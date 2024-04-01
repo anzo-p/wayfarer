@@ -25,7 +25,7 @@ export const calculateRoute = async (waypoints: UserMarker[]): Promise<google.ma
     origin: new google.maps.LatLng(originLat, originLng),
     destination: new google.maps.LatLng(destLat, destLng),
     waypoints: markers,
-    optimizeWaypoints: false,
+    optimizeWaypoints: true,
     travelMode: google.maps.TravelMode.DRIVING
   });
 };
