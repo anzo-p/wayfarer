@@ -1,9 +1,9 @@
-import React, { useEffect, useState } from 'react';
+import React, { useEffect, useRef, useState } from 'react';
 import { DirectionsRenderer, GoogleMap, Marker, useJsApiLoader } from '@react-google-maps/api';
 
 import { useWaypoints } from './WaypointContext';
 import { uniqueIdFrom, tooClose } from '../helpers/location';
-import { calculateRoute, getRouteWaypoints } from '../helpers/routes';
+import { calculateRoute, getRouteBounds, getRouteWaypoints } from '../helpers/routes';
 import { Coordinate } from '../types/waypointTypes';
 
 const googleMapsApiKey = process.env.REACT_APP_GOOGLE_MAPS_API_KEY;
@@ -24,9 +24,20 @@ const center = {
 
 const MapComponent: React.FC = () => {
   const { isLoaded } = useJsApiLoader({ id: 'google-map-loader', googleMapsApiKey });
-  const [_, setMap] = useState<google.maps.Map>();
+  const mapRef = useRef<google.maps.Map>();
   const [directions, setDirections] = useState<google.maps.DirectionsResult | null>(null);
   const { userMarkers, setUserMarkers, routeWaypoints, setRouteWaypoints } = useWaypoints();
+
+  const onLoad = React.useCallback(
+    function callback(map: google.maps.Map) {
+      mapRef.current = map;
+      if (userMarkers.length) {
+        const bounds = getRouteBounds(userMarkers);
+        map.fitBounds(bounds);
+      }
+    },
+    [userMarkers]
+  );
 
   const onMapClick = (event: google.maps.MapMouseEvent) => {
     const coordinate: Coordinate = { latitude: event.latLng!.lat(), longitude: event.latLng!.lng() };
@@ -63,34 +74,36 @@ const MapComponent: React.FC = () => {
     }
   }, [userMarkers]);
 
+  useEffect(() => {
+    const handleResize = () => {
+      if (mapRef.current && userMarkers.length) {
+        const bounds = getRouteBounds(userMarkers);
+        mapRef.current.fitBounds(bounds);
+      }
+    };
+    window.addEventListener('resize', handleResize);
+
+    return () => window.removeEventListener('resize', handleResize);
+  }, [userMarkers]);
+
   return isLoaded ? (
-    <>
-      <GoogleMap
-        mapContainerStyle={containerStyle}
-        center={center}
-        zoom={6}
-        onLoad={(map) => setMap(map)}
-        onClick={onMapClick}
-      >
-        <>
-          {routeWaypoints.length > 0
-            ? routeWaypoints.map((waypoint, index) => (
-                <Marker
-                  key={index}
-                  position={{ lat: waypoint.coordinate.latitude, lng: waypoint.coordinate.longitude }}
-                  label={waypoint.label}
-                />
-              ))
-            : userMarkers.map((marker, index) => (
-                <Marker key={index} position={{ lat: marker.coordinate.latitude, lng: marker.coordinate.longitude }} />
-              ))}
-          {directions && <DirectionsRenderer directions={directions} options={{ suppressMarkers: true }} />}
-        </>
-      </GoogleMap>
-    </>
-  ) : (
-    <></>
-  );
+    <GoogleMap mapContainerStyle={containerStyle} center={center} zoom={6} onLoad={onLoad} onClick={onMapClick}>
+      <>
+        {routeWaypoints.length > 0
+          ? routeWaypoints.map((waypoint, index) => (
+              <Marker
+                key={index}
+                position={{ lat: waypoint.coordinate.latitude, lng: waypoint.coordinate.longitude }}
+                label={waypoint.label}
+              />
+            ))
+          : userMarkers.map((marker, index) => (
+              <Marker key={index} position={{ lat: marker.coordinate.latitude, lng: marker.coordinate.longitude }} />
+            ))}
+        {directions && <DirectionsRenderer directions={directions} options={{ suppressMarkers: true }} />}
+      </>
+    </GoogleMap>
+  ) : null;
 };
 
 export default MapComponent;

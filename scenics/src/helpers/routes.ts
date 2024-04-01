@@ -80,3 +80,11 @@ const waypoint = (
     userWaypointId: nearestWaypoint ? nearestWaypoint.id : undefined
   };
 };
+
+export const getRouteBounds = (waypoints: UserMarker[]) => {
+  const bounds = new window.google.maps.LatLngBounds();
+  waypoints.forEach((waypoint) => {
+    bounds.extend(new window.google.maps.LatLng(waypoint.coordinate.latitude, waypoint.coordinate.longitude));
+  });
+  return bounds;
+};
