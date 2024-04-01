@@ -29,7 +29,7 @@ export const WaypointsProvider: React.FC<WaypointsProviderProps> = ({ children }
   const [routeWaypoints, setRouteWaypoints] = useState<RouteWaypoint[]>([]);
 
   const onDeleteWaypoint = (waypoint: RouteWaypoint) => {
-    setUserMarkers((userMarkers) => userMarkers.filter((marker) => marker.id !== waypoint.userWaypointId));
+    setUserMarkers((userMarkers) => userMarkers.filter((marker) => marker.id !== waypoint.userMarkerId));
     setRouteWaypoints((routeWaypoints) => routeWaypoints.filter((item) => item.id !== waypoint.id));
   };
 

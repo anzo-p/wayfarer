@@ -13,5 +13,5 @@ export interface RouteWaypoint {
   coordinate: Coordinate;
   label: string;
   address?: string;
-  userWaypointId?: string;
+  userMarkerId?: string;
 }

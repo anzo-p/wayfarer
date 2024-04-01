@@ -70,14 +70,14 @@ const waypoint = (
   userWaypoints: UserMarker[],
   label: string
 ): RouteWaypoint => {
-  const nearestWaypoint: UserMarker | undefined = findNearest(userWaypoints, coordinate);
+  const nearestMarker: UserMarker | undefined = findNearest(userWaypoints, coordinate);
 
   return {
     id: uuidv4(),
     label,
     coordinate,
     address,
-    userWaypointId: nearestWaypoint ? nearestWaypoint.id : undefined
+    userMarkerId: nearestMarker ? nearestMarker.id : undefined
   };
 };
 
