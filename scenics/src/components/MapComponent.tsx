@@ -1,10 +1,10 @@
 import React, { useEffect, useState } from 'react';
 import { DirectionsRenderer, GoogleMap, Marker, useJsApiLoader } from '@react-google-maps/api';
 
-import WaypointList from './WaypointList';
+import { useWaypoints } from './WaypointContext';
 import { uniqueIdFrom, tooClose } from '../helpers/location';
 import { calculateRoute, getRouteWaypoints } from '../helpers/routes';
-import { Coordinate, RouteWaypoint, UserMarker } from '../types/waypointTypes';
+import { Coordinate } from '../types/waypointTypes';
 
 const googleMapsApiKey = process.env.REACT_APP_GOOGLE_MAPS_API_KEY;
 
@@ -23,14 +23,10 @@ const center = {
 };
 
 const MapComponent: React.FC = () => {
+  const { isLoaded } = useJsApiLoader({ id: 'google-map-loader', googleMapsApiKey });
   const [_, setMap] = useState<google.maps.Map>();
-  const [userMarkers, setUserMarkers] = useState<UserMarker[]>([]);
-  const [routeWaypoints, setRouteWaypoints] = useState<RouteWaypoint[]>([]);
   const [directions, setDirections] = useState<google.maps.DirectionsResult | null>(null);
-  const { isLoaded } = useJsApiLoader({
-    id: 'google-map-script',
-    googleMapsApiKey
-  });
+  const { userMarkers, setUserMarkers, routeWaypoints, setRouteWaypoints } = useWaypoints();
 
   const onMapClick = (event: google.maps.MapMouseEvent) => {
     const coordinate: Coordinate = { latitude: event.latLng!.lat(), longitude: event.latLng!.lng() };
@@ -47,11 +43,6 @@ const MapComponent: React.FC = () => {
         coordinate
       }
     ]);
-  };
-
-  const onDeleteWaypoint = (waypoint: RouteWaypoint) => {
-    setUserMarkers((userMarkers) => userMarkers.filter((marker) => marker.id !== waypoint.userWaypointId));
-    setRouteWaypoints((routeWaypoints) => routeWaypoints.filter((item) => item.id !== waypoint.id));
   };
 
   useEffect(() => {
@@ -96,7 +87,6 @@ const MapComponent: React.FC = () => {
           {directions && <DirectionsRenderer directions={directions} options={{ suppressMarkers: true }} />}
         </>
       </GoogleMap>
-      <WaypointList waypoints={routeWaypoints} onDelete={onDeleteWaypoint} />
     </>
   ) : (
     <></>

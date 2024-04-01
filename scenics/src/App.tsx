@@ -1,10 +1,13 @@
-import MapWithSearch from './components/MapComponent';
+import { WaypointsProvider } from './components/WaypointContext';
+import MapComponent from './components/MapComponent';
+import WaypointList from './components/WaypointList';
 
 function App() {
   return (
-    <div className="App">
-      <MapWithSearch />
-    </div>
+    <WaypointsProvider>
+      <MapComponent />
+      <WaypointList />
+    </WaypointsProvider>
   );
 }
 
