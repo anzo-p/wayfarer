@@ -12,9 +12,9 @@ if (!googleMapsApiKey) {
   throw new Error('GOOGLE_MAPS_API_KEY is not set');
 }
 
-const containerStyle = {
-  width: '100vw',
-  height: '66vh'
+const containerStyle: React.CSSProperties = {
+  width: '100%',
+  height: '100%'
 };
 
 const center = {

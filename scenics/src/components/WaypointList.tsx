@@ -3,7 +3,7 @@ import React from 'react';
 import { useWaypoints } from './WaypointContext';
 import { RouteWaypoint } from '../types/waypointTypes';
 
-const itemStyle = {
+const itemStyle: React.CSSProperties = {
   display: 'flex',
   justifyContent: 'space-between',
   padding: '10px',
