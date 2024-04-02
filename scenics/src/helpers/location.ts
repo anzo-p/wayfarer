@@ -2,10 +2,6 @@ import { Coordinate, UserMarker } from 'types/waypointTypes';
 
 const proximityThreshold = 0.0001;
 
-export const uniqueIdFrom = (coordinate: Coordinate, precision: number = 5): string => {
-  return `${coordinate.latitude.toFixed(precision)}-${coordinate.longitude.toFixed(precision)}`;
-};
-
 export const findNearest = (waypoints: UserMarker[], coordinate: Coordinate): UserMarker | undefined => {
   let nearest = undefined;
   let minDistance = Infinity;

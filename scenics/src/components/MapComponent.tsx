@@ -1,9 +1,10 @@
 import React, { useEffect, useRef, useState } from 'react';
 import { DirectionsRenderer, GoogleMap, Marker, useJsApiLoader } from '@react-google-maps/api';
+import { v4 as uuidv4 } from 'uuid';
 
 import { useWaypoints } from './WaypointContext';
-import { uniqueIdFrom, tooClose } from 'helpers/location';
-import { calculateRoute, getRouteBounds, getRouteWaypoints } from 'services/google/directionsApi';
+import { tooClose } from 'helpers/location';
+import { calculateDirections, getRouteBounds, getRouteWaypoints } from 'services/google/directionsApi';
 import { Coordinate } from 'types/waypointTypes';
 
 const googleMapsApiKey = process.env.REACT_APP_GOOGLE_MAPS_API_KEY;
@@ -50,16 +51,16 @@ const MapComponent: React.FC = () => {
     setUserMarkers((current) => [
       ...current,
       {
-        id: uniqueIdFrom(coordinate),
+        id: uuidv4(),
         coordinate
       }
     ]);
   };
 
   useEffect(() => {
-    const fetchRoute = async () => {
+    const getDirections = async () => {
       try {
-        const result: google.maps.DirectionsResult = await calculateRoute(userMarkers);
+        const result: google.maps.DirectionsResult = await calculateDirections(userMarkers);
         setDirections(result);
         setRouteWaypoints(getRouteWaypoints(result, userMarkers));
       } catch (error) {
@@ -68,7 +69,7 @@ const MapComponent: React.FC = () => {
     };
 
     if (userMarkers.length >= 2) {
-      fetchRoute();
+      getDirections();
     } else {
       setDirections(null);
     }
