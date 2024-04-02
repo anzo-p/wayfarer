@@ -59,7 +59,7 @@ const MapComponent: React.FC = () => {
   useEffect(() => {
     const fetchRoute = async () => {
       try {
-        const result = await calculateRoute(userMarkers);
+        const result: google.maps.DirectionsResult = await calculateRoute(userMarkers);
         setDirections(result);
         setRouteWaypoints(getRouteWaypoints(result, userMarkers));
       } catch (error) {
