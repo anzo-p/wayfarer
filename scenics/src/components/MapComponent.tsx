@@ -4,7 +4,7 @@ import { v4 as uuidv4 } from 'uuid';
 
 import { useWaypoints } from './WaypointContext';
 import { tooClose } from 'helpers/location';
-import { calculateDirections, getRouteBounds, getRouteWaypoints } from 'services/google/directionsApi';
+import { calculateDirections, getRouteBounds, attachRouteWaypoints } from 'services/google/directionsApi';
 import { Coordinate } from 'types/waypointTypes';
 
 const googleMapsApiKey = process.env.REACT_APP_GOOGLE_MAPS_API_KEY;
@@ -62,7 +62,7 @@ const MapComponent: React.FC = () => {
       try {
         const result: google.maps.DirectionsResult = await calculateDirections(userMarkers);
         setDirections(result);
-        setRouteWaypoints(getRouteWaypoints(result, userMarkers));
+        setRouteWaypoints([...attachRouteWaypoints(result, userMarkers, routeWaypoints)]);
       } catch (error) {
         console.error('Error calculating route:', error);
       }

@@ -30,29 +30,34 @@ export const calculateDirections = async (markers: UserMarker[]): Promise<google
   });
 };
 
-export const getRouteWaypoints = (response: google.maps.DirectionsResult, markers: UserMarker[]): RouteWaypoint[] => {
+export const attachRouteWaypoints = (
+  response: google.maps.DirectionsResult,
+  userMarkers: UserMarker[],
+  routeWaypoints: RouteWaypoint[]
+): RouteWaypoint[] => {
   if (response.routes.length === 0 || response.routes[0]?.legs.length === 0) {
     return [];
   }
 
   const legs = response.routes[0].legs;
-  const routeWaypoints: RouteWaypoint[] = [];
 
-  routeWaypoints.push(
+  merge(
+    routeWaypoints,
     waypoint(
       { latitude: legs[0].start_location.lat(), longitude: legs[0].start_location.lng() },
       legs[0].start_address,
-      markers,
+      userMarkers,
       alphabethAt(0)
     )
   );
 
   legs.forEach((leg, index) => {
-    routeWaypoints.push(
+    merge(
+      routeWaypoints,
       waypoint(
         { latitude: leg.end_location.lat(), longitude: leg.end_location.lng() },
         leg.end_address,
-        markers,
+        userMarkers,
         alphabethAt(index + 1)
       )
     );
@@ -71,6 +76,12 @@ const waypoint = (coordinate: Coordinate, address: string, markers: UserMarker[]
     address,
     userMarkerId: nearestMarker ? nearestMarker.id : undefined
   };
+};
+
+const merge = (routeWaypoints: RouteWaypoint[], newWaypoint: RouteWaypoint) => {
+  if (!routeWaypoints.map((waypoint) => waypoint.userMarkerId).includes(newWaypoint.userMarkerId)) {
+    routeWaypoints.push(newWaypoint);
+  }
 };
 
 export const getRouteBounds = (markers: UserMarker[]) => {
