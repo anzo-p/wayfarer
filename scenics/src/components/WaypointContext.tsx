@@ -1,6 +1,6 @@
-import React, { createContext, useContext, useState, ReactNode } from 'react';
+import React, { createContext, useContext, useState } from 'react';
 
-import { RouteWaypoint, UserMarker } from '../types/waypointTypes';
+import { RouteWaypoint, UserMarker } from 'types/waypointTypes';
 
 interface WaypointsContextType {
   userMarkers: UserMarker[];
@@ -21,7 +21,7 @@ const WaypointsContext = createContext<WaypointsContextType>({
 export const useWaypoints = () => useContext(WaypointsContext);
 
 interface WaypointsProviderProps {
-  children: ReactNode;
+  children: React.ReactNode;
 }
 
 export const WaypointsProvider: React.FC<WaypointsProviderProps> = ({ children }) => {

@@ -1,8 +1,8 @@
 import { v4 as uuidv4 } from 'uuid';
 
-import { Coordinate, RouteWaypoint, UserMarker } from '../types/waypointTypes';
-import { findNearest } from './location';
-import { alphabethAt } from './string';
+import { Coordinate, RouteWaypoint, UserMarker } from 'types/waypointTypes';
+import { findNearest } from 'helpers/location';
+import { alphabethAt } from 'helpers/string';
 
 export const calculateRoute = async (waypoints: UserMarker[]): Promise<google.maps.DirectionsResult> => {
   if (waypoints.length < 2) {

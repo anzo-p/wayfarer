@@ -2,9 +2,9 @@ import React, { useEffect, useRef, useState } from 'react';
 import { DirectionsRenderer, GoogleMap, Marker, useJsApiLoader } from '@react-google-maps/api';
 
 import { useWaypoints } from './WaypointContext';
-import { uniqueIdFrom, tooClose } from '../helpers/location';
-import { calculateRoute, getRouteBounds, getRouteWaypoints } from '../helpers/routes';
-import { Coordinate } from '../types/waypointTypes';
+import { uniqueIdFrom, tooClose } from 'helpers/location';
+import { calculateRoute, getRouteBounds, getRouteWaypoints } from 'services/google/directionsApi';
+import { Coordinate } from 'types/waypointTypes';
 
 const googleMapsApiKey = process.env.REACT_APP_GOOGLE_MAPS_API_KEY;
 
