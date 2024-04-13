@@ -1,6 +1,6 @@
 import { v4 as uuidv4 } from 'uuid';
 
-import { Coordinate, RouteWaypoint, UserMarker } from 'types/waypointTypes';
+import { Coordinate, RouteWaypoint, UserMarker } from 'types/journey';
 import { findNearest } from 'helpers/location';
 import { alphabethAt } from 'helpers/string';
 
@@ -70,11 +70,11 @@ const waypoint = (coordinate: Coordinate, address: string, markers: UserMarker[]
   const nearestMarker: UserMarker | undefined = findNearest(markers, coordinate);
 
   return {
-    id: uuidv4(),
+    waypointId: uuidv4(),
     label,
     coordinate,
     address,
-    userMarkerId: nearestMarker ? nearestMarker.id : undefined
+    userMarkerId: nearestMarker ? nearestMarker.markerId : undefined
   };
 };
 

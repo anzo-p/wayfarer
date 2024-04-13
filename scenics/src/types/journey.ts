@@ -8,7 +8,7 @@ export type Coordinate = {
  * Rendered when there is no route yet.
  */
 export type UserMarker = {
-  id: string;
+  markerId: string;
   coordinate: Coordinate;
 };
 
@@ -17,9 +17,21 @@ export type UserMarker = {
  * Rendered instead of the UserMarkers when a route exists between any markers.
  */
 export type RouteWaypoint = {
-  id: string;
+  waypointId: string;
+  userMarkerId?: string;
   coordinate: Coordinate;
   label: string;
   address?: string;
-  userMarkerId?: string;
 };
+
+export type Journey = {
+  journeyId: string;
+  time: Date;
+  title?: string;
+  markers: UserMarker[];
+  waypoints: RouteWaypoint[];
+  startWaypointId: string;
+  endWaypointId: string;
+};
+
+export type MaybeJourney = Journey | undefined;

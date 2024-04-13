@@ -1,13 +1,16 @@
+import { BrowserRouter as Router, Route, Routes } from 'react-router-dom';
+
 import { WaypointsProvider } from './components/WaypointContext';
-import ResponsiveMajorMinor from './components/ResponsiveMajorMinor';
-import MapComponent from './components/MapComponent';
-import WaypointList from './components/WaypointList';
 
 function App() {
   return (
-    <WaypointsProvider>
-      <ResponsiveMajorMinor major={<MapComponent />} minor={<WaypointList />} />
-    </WaypointsProvider>
+    <Router>
+      <Routes>
+        <Route path="/routes" element={<WaypointsProvider />} />
+        <Route path="/routes/:routeHash" element={<WaypointsProvider />} />
+        <Route path="*" element={<div>No Data Found</div>} />
+      </Routes>
+    </Router>
   );
 }
 

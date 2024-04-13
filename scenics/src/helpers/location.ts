@@ -1,4 +1,4 @@
-import { Coordinate, UserMarker } from 'types/waypointTypes';
+import { Coordinate, UserMarker } from 'types/journey';
 
 const proximityThreshold = 0.0001;
 

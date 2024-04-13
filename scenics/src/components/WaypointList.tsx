@@ -1,7 +1,7 @@
 import React from 'react';
 
 import { useWaypoints } from './WaypointContext';
-import { RouteWaypoint } from 'types/waypointTypes';
+import { RouteWaypoint } from 'types/journey';
 
 const itemStyle: React.CSSProperties = {
   display: 'flex',
@@ -16,7 +16,7 @@ const WaypointList: React.FC = () => {
   return (
     <div>
       {routeWaypoints.map((waypointItem: RouteWaypoint) => (
-        <div key={waypointItem.id} style={itemStyle}>
+        <div key={waypointItem.waypointId} style={itemStyle}>
           <span>{waypointItem.label}</span>
           <button onClick={() => onDeleteWaypoint(waypointItem)}>Delete</button>
         </div>

@@ -1,6 +1,10 @@
 import React, { createContext, useContext, useState } from 'react';
+import { useParams } from 'react-router-dom';
 
-import { RouteWaypoint, UserMarker } from 'types/waypointTypes';
+import ResponsiveMajorMinor from './ResponsiveMajorMinor';
+import MapComponent from './MapComponent';
+import WaypointList from './WaypointList';
+import { RouteWaypoint, UserMarker } from 'types/journey';
 
 interface WaypointsContextType {
   userMarkers: UserMarker[];
@@ -20,24 +24,21 @@ const WaypointsContext = createContext<WaypointsContextType>({
 
 export const useWaypoints = () => useContext(WaypointsContext);
 
-interface WaypointsProviderProps {
-  children: React.ReactNode;
-}
-
-export const WaypointsProvider: React.FC<WaypointsProviderProps> = ({ children }) => {
+export const WaypointsProvider: React.FC = () => {
+  const { routeHash } = useParams<{ routeHash?: string }>();
   const [userMarkers, setUserMarkers] = useState<UserMarker[]>([]);
   const [routeWaypoints, setRouteWaypoints] = useState<RouteWaypoint[]>([]);
 
   const onDeleteWaypoint = (waypoint: RouteWaypoint) => {
-    setUserMarkers((userMarkers) => userMarkers.filter((marker) => marker.id !== waypoint.userMarkerId));
-    setRouteWaypoints((routeWaypoints) => routeWaypoints.filter((item) => item.id !== waypoint.id));
+    setUserMarkers((userMarkers) => userMarkers.filter((marker) => marker.markerId !== waypoint.userMarkerId));
+    setRouteWaypoints((routeWaypoints) => routeWaypoints.filter((item) => item.waypointId !== waypoint.waypointId));
   };
 
   return (
     <WaypointsContext.Provider
       value={{ userMarkers, setUserMarkers, routeWaypoints, setRouteWaypoints, onDeleteWaypoint }}
     >
-      {children}
+      <ResponsiveMajorMinor major={<MapComponent journeyId={routeHash} />} minor={<WaypointList />} />
     </WaypointsContext.Provider>
   );
 };
