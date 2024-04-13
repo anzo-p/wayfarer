@@ -1,12 +1,8 @@
-import { v4 as uuidv4 } from 'uuid';
-
-import { findNearest } from '@/src/helpers/location';
-import { alphabethAt } from '@/src/helpers/string';
+import { makeWaypoint, updateLabels } from '@/src/helpers/waypoints';
 import { Coordinate, RouteWaypoint, UserMarker } from '@/src/types/journey';
 
 export const calculateDirections = async (markers: UserMarker[]): Promise<google.maps.DirectionsResult> => {
   if (markers.length < 2) {
-    console.log('Need at least two markers to calculate a route.');
     Promise.resolve([]);
   }
 
@@ -30,7 +26,7 @@ export const calculateDirections = async (markers: UserMarker[]): Promise<google
   });
 };
 
-export const attachRouteWaypoints = (
+export const linkMarkersWaypoints = (
   response: google.maps.DirectionsResult,
   userMarkers: UserMarker[],
   routeWaypoints: RouteWaypoint[]
@@ -39,49 +35,31 @@ export const attachRouteWaypoints = (
     return [];
   }
 
-  const legs = response.routes[0].legs;
+  const legs: google.maps.DirectionsLeg[] = response.routes[0].legs;
 
-  merge(
+  mergeWaypoint(
     routeWaypoints,
-    waypoint(
+    makeWaypoint(
       { latitude: legs[0].start_location.lat(), longitude: legs[0].start_location.lng() },
       legs[0].start_address,
-      userMarkers,
-      alphabethAt(0)
+      userMarkers
     )
   );
 
-  legs.forEach((leg, index) => {
-    merge(
+  legs.forEach((leg) => {
+    mergeWaypoint(
       routeWaypoints,
-      waypoint(
+      makeWaypoint(
         { latitude: leg.end_location.lat(), longitude: leg.end_location.lng() },
         leg.end_address,
-        userMarkers,
-        alphabethAt(index + 1)
+        userMarkers
       )
     );
   });
 
+  updateLabels(legs, routeWaypoints);
+
   return routeWaypoints;
-};
-
-const waypoint = (coordinate: Coordinate, address: string, markers: UserMarker[], label: string): RouteWaypoint => {
-  const nearestMarker: UserMarker | undefined = findNearest(markers, coordinate);
-
-  return {
-    waypointId: uuidv4(),
-    label,
-    coordinate,
-    address,
-    userMarkerId: nearestMarker ? nearestMarker.markerId : undefined
-  };
-};
-
-const merge = (routeWaypoints: RouteWaypoint[], newWaypoint: RouteWaypoint) => {
-  if (!routeWaypoints.map((waypoint) => waypoint.userMarkerId).includes(newWaypoint.userMarkerId)) {
-    routeWaypoints.push(newWaypoint);
-  }
 };
 
 export const getRouteBounds = (markers: UserMarker[]) => {
@@ -90,4 +68,10 @@ export const getRouteBounds = (markers: UserMarker[]) => {
     bounds.extend(new window.google.maps.LatLng(marker.coordinate.latitude, marker.coordinate.longitude));
   });
   return bounds;
+};
+
+const mergeWaypoint = (waypoints: RouteWaypoint[], newWaypoint: RouteWaypoint) => {
+  if (!waypoints.map((waypoint) => waypoint.userMarkerId).includes(newWaypoint.userMarkerId)) {
+    waypoints.push(newWaypoint);
+  }
 };

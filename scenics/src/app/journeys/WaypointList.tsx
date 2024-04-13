@@ -15,12 +15,14 @@ const WaypointList: React.FC = () => {
 
   return (
     <div>
-      {routeWaypoints.map((waypointItem: RouteWaypoint) => (
-        <div key={waypointItem.waypointId} style={itemStyle}>
-          <span>{waypointItem.label}</span>
-          <button onClick={() => onDeleteWaypoint(waypointItem)}>Delete</button>
-        </div>
-      ))}
+      {routeWaypoints
+        .sort((a, b) => a.label.localeCompare(b.label))
+        .map((waypointItem: RouteWaypoint) => (
+          <div key={waypointItem.waypointId} style={itemStyle}>
+            <span>{waypointItem.label}</span>
+            <button onClick={() => onDeleteWaypoint(waypointItem)}>Delete</button>
+          </div>
+        ))}
     </div>
   );
 };

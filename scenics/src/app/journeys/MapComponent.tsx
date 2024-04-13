@@ -3,7 +3,7 @@ import { DirectionsRenderer, GoogleMap, Marker, useJsApiLoader } from '@react-go
 import { v4 as uuidv4 } from 'uuid';
 
 import { tooClose } from '@/src/helpers/location';
-import { calculateDirections, getRouteBounds, attachRouteWaypoints } from '@/src/services/google/directionsApi';
+import { calculateDirections, getRouteBounds, linkMarkersWaypoints } from '@/src/services/google/directionsApi';
 import { Coordinate, Journey } from '@/src/types/journey';
 import { useWaypoints } from './WaypointContext';
 
@@ -73,7 +73,7 @@ const MapComponent: React.FC<MapComponentProps> = ({ journey }) => {
       try {
         const result: google.maps.DirectionsResult = await calculateDirections(userMarkers);
         setDirections(result);
-        setRouteWaypoints([...attachRouteWaypoints(result, userMarkers, routeWaypoints)]);
+        setRouteWaypoints([...linkMarkersWaypoints(result, userMarkers, routeWaypoints)]);
       } catch (error) {
         console.error('Error calculating route:', error);
       }
