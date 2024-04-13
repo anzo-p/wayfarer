@@ -1,4 +1,4 @@
-import { MaybeJourney } from '../../types/journey';
+import { MaybeJourney } from '@/src/types/journey';
 
 async function fetchJourney(journeyId: string): Promise<MaybeJourney> {
   const query = `

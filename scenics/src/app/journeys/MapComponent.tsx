@@ -3,12 +3,11 @@ import { DirectionsRenderer, GoogleMap, Marker, useJsApiLoader } from '@react-go
 import { v4 as uuidv4 } from 'uuid';
 
 import { useWaypoints } from './WaypointContext';
-import { tooClose } from 'helpers/location';
-import { calculateDirections, getRouteBounds, attachRouteWaypoints } from 'services/google/directionsApi';
-import fetchJourney from 'services/journal/fetchJourney';
-import { Coordinate, MaybeJourney } from 'types/journey';
+import { tooClose } from '@/src/helpers/location';
+import { calculateDirections, getRouteBounds, attachRouteWaypoints } from '@/src/services/google/directionsApi';
+import { Coordinate, Journey } from '@/src/types/journey';
 
-const googleMapsApiKey = process.env.REACT_APP_GOOGLE_MAPS_API_KEY;
+const googleMapsApiKey = process.env.NEXT_PUBLIC_GOOGLE_MAPS_API_KEY;
 
 if (!googleMapsApiKey) {
   throw new Error('GOOGLE_MAPS_API_KEY is not set');
@@ -25,10 +24,10 @@ const center = {
 };
 
 export interface MapComponentProps {
-  journeyId?: string;
+  journey?: Journey;
 }
 
-const MapComponent: React.FC<MapComponentProps> = ({ journeyId }) => {
+const MapComponent: React.FC<MapComponentProps> = ({ journey }) => {
   const { isLoaded } = useJsApiLoader({ id: 'google-map-loader', googleMapsApiKey });
   const mapRef = useRef<google.maps.Map>();
   const [directions, setDirections] = useState<google.maps.DirectionsResult | null>(null);
@@ -63,24 +62,11 @@ const MapComponent: React.FC<MapComponentProps> = ({ journeyId }) => {
   };
 
   useEffect(() => {
-    if (journeyId) {
-      if (!isLoaded) return;
-
-      const fetch = async () => {
-        try {
-          const journey: MaybeJourney = await fetchJourney(journeyId);
-
-          if (journey) {
-            setUserMarkers(journey.markers);
-            setRouteWaypoints(journey.waypoints);
-          }
-        } catch (error) {
-          console.error(`Error fetching route for ${journeyId}: ${error}`);
-        }
-      };
-      fetch();
+    if (journey && isLoaded) {
+      setUserMarkers(journey.markers);
+      setRouteWaypoints(journey.waypoints);
     }
-  }, [journeyId, isLoaded]);
+  }, [journey, isLoaded]);
 
   useEffect(() => {
     const getDirections = async () => {

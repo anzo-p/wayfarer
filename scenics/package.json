@@ -1,51 +1,33 @@
 {
-  "name": "scenics",
+  "name": "planner",
   "version": "0.1.0",
   "private": true,
-  "dependencies": {
-    "@react-google-maps/api": "^2.19.3",
-    "@testing-library/jest-dom": "^5.17.0",
-    "@testing-library/react": "^13.4.0",
-    "@testing-library/user-event": "^13.5.0",
-    "@types/react": "^18.2.73",
-    "@types/react-dom": "^18.2.23",
-    "react": "^18.2.0",
-    "react-dom": "^18.2.0",
-    "react-router-dom": "^6.22.3",
-    "react-scripts": "5.0.1",
-    "typescript": "^4.9.5",
-    "uuid": "^9.0.1",
-    "web-vitals": "^2.1.4"
-  },
-  "overrides": {
-    "nth-check": "^2.0.1",
-    "postcss": "^8.4.38"
-  },
   "scripts": {
-    "start": "react-scripts start",
-    "build": "react-scripts build",
-    "test": "react-scripts test",
-    "eject": "react-scripts eject"
+    "dev": "next dev",
+    "build": "next build",
+    "start": "next start",
+    "lint": "next lint"
   },
-  "eslintConfig": {
-    "extends": [
-      "react-app",
-      "react-app/jest"
-    ]
-  },
-  "browserslist": {
-    "production": [
-      ">0.2%",
-      "not dead",
-      "not op_mini all"
-    ],
-    "development": [
-      "last 1 chrome version",
-      "last 1 firefox version",
-      "last 1 safari version"
-    ]
+  "dependencies": {
+    "@apollo/client": "^3.9.11",
+    "@react-google-maps/api": "^2.19.3",
+    "graphql": "^16.8.1",
+    "next": "14.1.4",
+    "react": "^18.2.0",
+    "react-dom": "^18",
+    "uuid": "^9.0.1"
   },
   "devDependencies": {
-    "@types/uuid": "^9.0.8"
+    "@types/next": "^9.0.0",
+    "@types/node": "^20",
+    "@types/react": "^18",
+    "@types/react-dom": "^18",
+    "@types/uuid": "^9.0.8",
+    "autoprefixer": "^10.0.1",
+    "eslint": "^8",
+    "eslint-config-next": "14.1.4",
+    "postcss": "^8",
+    "tailwindcss": "^3.3.0",
+    "typescript": "^5"
   }
 }

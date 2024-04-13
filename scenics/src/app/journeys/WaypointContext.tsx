@@ -1,10 +1,10 @@
+'use client';
 import React, { createContext, useContext, useState } from 'react';
-import { useParams } from 'react-router-dom';
 
-import ResponsiveMajorMinor from './ResponsiveMajorMinor';
+import ResponsiveMajorMinor from '@/src/components/ui/ResponsiveMajorMinor';
 import MapComponent from './MapComponent';
 import WaypointList from './WaypointList';
-import { RouteWaypoint, UserMarker } from 'types/journey';
+import { Journey, RouteWaypoint, UserMarker } from '@/src/types/journey';
 
 interface WaypointsContextType {
   userMarkers: UserMarker[];
@@ -24,8 +24,11 @@ const WaypointsContext = createContext<WaypointsContextType>({
 
 export const useWaypoints = () => useContext(WaypointsContext);
 
-export const WaypointsProvider: React.FC = () => {
-  const { routeHash } = useParams<{ routeHash?: string }>();
+export interface WaypointsProviderProps {
+  journey?: Journey;
+}
+
+const WaypointsProvider: React.FC<WaypointsProviderProps> = ({ journey }) => {
   const [userMarkers, setUserMarkers] = useState<UserMarker[]>([]);
   const [routeWaypoints, setRouteWaypoints] = useState<RouteWaypoint[]>([]);
 
@@ -38,7 +41,9 @@ export const WaypointsProvider: React.FC = () => {
     <WaypointsContext.Provider
       value={{ userMarkers, setUserMarkers, routeWaypoints, setRouteWaypoints, onDeleteWaypoint }}
     >
-      <ResponsiveMajorMinor major={<MapComponent journeyId={routeHash} />} minor={<WaypointList />} />
+      <ResponsiveMajorMinor major={<MapComponent journey={journey} />} minor={<WaypointList />} />
     </WaypointsContext.Provider>
   );
 };
+
+export default WaypointsProvider;

@@ -1,7 +1,7 @@
 import React from 'react';
 
 import { useWaypoints } from './WaypointContext';
-import { RouteWaypoint } from 'types/journey';
+import { RouteWaypoint } from '@/src/types/journey';
 
 const itemStyle: React.CSSProperties = {
   display: 'flex',
