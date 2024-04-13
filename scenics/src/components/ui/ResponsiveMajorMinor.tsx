@@ -27,15 +27,15 @@ const minorStyles: React.CSSProperties = {
 };
 
 const ResponsiveMajorMinor: React.FC<ResponsiveMajorMinorProps> = ({ major, minor }) => {
-  const [isLandscape, setIsLandscape] = useState(window.innerWidth > window.innerHeight);
+  const [isLandscape, setIsLandscape] = useState(false);
 
   useEffect(() => {
-    const handleResize = () => {
-      setIsLandscape(window.innerWidth > window.innerHeight);
-    };
-    window.addEventListener('resize', handleResize);
+    const getOrientation = () => setIsLandscape(window.innerWidth > window.innerHeight);
+    getOrientation();
 
-    return () => window.removeEventListener('resize', handleResize);
+    window.addEventListener('resize', getOrientation);
+
+    return () => window.removeEventListener('resize', getOrientation);
   }, []);
 
   return (
