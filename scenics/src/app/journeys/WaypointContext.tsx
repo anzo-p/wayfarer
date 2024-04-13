@@ -2,9 +2,9 @@
 import React, { createContext, useContext, useState } from 'react';
 
 import ResponsiveMajorMinor from '@/src/components/ui/ResponsiveMajorMinor';
+import { Journey, RouteWaypoint, UserMarker } from '@/src/types/journey';
 import MapComponent from './MapComponent';
 import WaypointList from './WaypointList';
-import { Journey, RouteWaypoint, UserMarker } from '@/src/types/journey';
 
 interface WaypointsContextType {
   userMarkers: UserMarker[];
