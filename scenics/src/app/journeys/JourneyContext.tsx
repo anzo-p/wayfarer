@@ -14,13 +14,17 @@ interface JourneyContextType {
   setJourney: React.Dispatch<React.SetStateAction<Journey>>;
   addMarker: (marker: UserMarker) => void;
   removeWaypoint: (waypointId: string) => void;
+  optimizeWaypoints: boolean;
+  toggleOptimize: React.Dispatch<React.SetStateAction<boolean>>;
 }
 
 const JourneyContext = createContext<JourneyContextType>({
   journey: makeJourney(),
   setJourney: () => {},
   addMarker: () => {},
-  removeWaypoint: () => {}
+  removeWaypoint: () => {},
+  optimizeWaypoints: true,
+  toggleOptimize: () => {}
 });
 
 export const useJourney = () => useContext(JourneyContext);
@@ -31,6 +35,7 @@ export interface JourneyProviderProps {
 
 const JourneyProvider: React.FC<JourneyProviderProps> = ({ journey: loadedJourney }) => {
   const [journey, setJourney] = useState<Journey>(loadedJourney || makeJourney());
+  const [optimizeWaypoints, toggleOptimize] = useState(true);
   const [lastSavedMarkers, setLastSavedMarkers] = useState<UserMarker[]>(() => loadedJourney?.markers || []);
   const [isModified, setIsModified] = useState(false);
 
@@ -81,9 +86,11 @@ const JourneyProvider: React.FC<JourneyProviderProps> = ({ journey: loadedJourne
       journey,
       setJourney,
       addMarker,
-      removeWaypoint
+      removeWaypoint,
+      optimizeWaypoints,
+      toggleOptimize
     }),
-    [journey, setJourney, addMarker, removeWaypoint]
+    [journey, setJourney, addMarker, removeWaypoint, optimizeWaypoints, toggleOptimize]
   );
 
   return (

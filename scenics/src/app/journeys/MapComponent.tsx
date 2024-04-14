@@ -28,8 +28,8 @@ const center = {
 const MapComponent: React.FC = () => {
   const { isLoaded } = useJsApiLoader({ id: 'google-map-loader', googleMapsApiKey });
   const mapRef = useRef<google.maps.Map>();
+  const { journey, setJourney, addMarker, optimizeWaypoints } = useJourney();
   const [directions, setDirections] = useState<MaybeDirections>(undefined);
-  const { journey, setJourney, addMarker } = useJourney();
 
   const onLoad = React.useCallback(
     function callback(map: google.maps.Map) {
@@ -63,7 +63,7 @@ const MapComponent: React.FC = () => {
     }
     const getDirections = async () => {
       try {
-        const directions: MaybeDirections = await requestDirections(journey.markers);
+        const directions: MaybeDirections = await requestDirections(journey.markers, { optimizeWaypoints });
         if (!directions) {
           return;
         }
@@ -88,7 +88,7 @@ const MapComponent: React.FC = () => {
     } else {
       setDirections(undefined);
     }
-  }, [isLoaded, journey.waypoints, journey.markers, setJourney]);
+  }, [isLoaded, journey.waypoints, journey.markers, setJourney, optimizeWaypoints]);
 
   useEffect(() => {
     const handleResize = () => {

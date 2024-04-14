@@ -12,7 +12,7 @@ const itemStyle: React.CSSProperties = {
 };
 
 const WaypointList: React.FC = () => {
-  const { journey, removeWaypoint } = useJourney();
+  const { journey, removeWaypoint, optimizeWaypoints, toggleOptimize } = useJourney();
 
   return (
     <div>
@@ -24,6 +24,9 @@ const WaypointList: React.FC = () => {
             <button onClick={() => removeWaypoint(waypoint.waypointId)}>Delete</button>
           </div>
         ))}
+      <button onClick={() => toggleOptimize(!optimizeWaypoints)}>
+        Waypoint optimization {optimizeWaypoints ? 'On' : 'Off'}
+      </button>
     </div>
   );
 };
