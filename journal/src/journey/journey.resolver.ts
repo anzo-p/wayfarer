@@ -24,7 +24,7 @@ export class JourneysResolver {
   }
 
   @Query(() => Journey)
-  async journey(@Args('journeyId') id: string): Promise<Journey> {
-    return this.journeysService.findOneById(id);
+  async journey(@Args('journeyId') journeyId: string): Promise<Journey> {
+    return this.journeysService.findOneById(journeyId);
   }
 }

@@ -10,12 +10,15 @@ export const journeyFromDb = (
   const item: Journey = {
     journeyId: rec.id.S!,
     time: epochToIso8601(Number(rec.time.N!)),
-    title: rec.title.S ?? undefined,
     waypoints,
     markers,
     startWaypointId: rec.startWaypointId.S!,
     endWaypointId: rec.endWaypointId.S!
   };
+
+  if (rec.title) {
+    item.title = rec.title.S!;
+  }
 
   return item;
 };
