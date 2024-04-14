@@ -2,8 +2,9 @@ import { DirectionsRenderer, GoogleMap, Marker, useJsApiLoader } from '@react-go
 import React, { useEffect, useRef, useState } from 'react';
 import { v4 as uuidv4 } from 'uuid';
 
-import { MaybeDirections, requestDirections, getMapBounds, linkWaypointsToMarkers } from '@/src/api/directions';
+import { MaybeDirections, requestDirections, getMapBounds } from '@/src/api/directions';
 import { tooClose } from '@/src/helpers/location';
+import { getStartAndFinish, refreshWaypoints } from '@/src/helpers/waypoints';
 import { Coordinate } from '@/src/types/journey';
 
 import { useJourney } from './JourneyContext';
@@ -68,21 +69,14 @@ const MapComponent: React.FC = () => {
         }
 
         setDirections(directions);
-        const updatedWaypoints = linkWaypointsToMarkers(directions, journey.markers, journey.waypoints);
-        const startLoc = directions.routes[0].legs[0].start_location;
-        const startWaypoint = updatedWaypoints.find(
-          (w) => w.coordinate.latitude === startLoc.lat() && w.coordinate.longitude === startLoc.lng()
-        );
-        const legCount = directions.routes[0].legs.length;
-        const endLoc = directions.routes[0].legs[legCount - 1].end_location;
-        const endWaypoint = updatedWaypoints.find(
-          (w) => w.coordinate.latitude === endLoc.lat() && w.coordinate.longitude === endLoc.lng()
-        );
+        const waypoints = refreshWaypoints(directions, journey.markers, journey.waypoints);
+        const { start, finish } = getStartAndFinish(directions, waypoints);
+
         setJourney((journey) => ({
           ...journey,
-          waypoints: updatedWaypoints,
-          startWaypointId: journey.startWaypointId || startWaypoint?.waypointId || '',
-          endWaypointId: journey.markers.length > 0 ? endWaypoint?.waypointId || '' : journey.endWaypointId || ''
+          waypoints: waypoints,
+          startWaypointId: journey.startWaypointId || start?.waypointId || '',
+          endWaypointId: journey.markers.length > 0 ? finish?.waypointId || '' : journey.endWaypointId || ''
         }));
       } catch (error) {
         console.error('Error calculating route:', error);
