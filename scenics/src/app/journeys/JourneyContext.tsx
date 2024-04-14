@@ -2,9 +2,11 @@
 import React, { createContext, useContext, useEffect, useMemo, useState } from 'react';
 
 import ResponsiveMajorMinor from '@/src/components/ui/ResponsiveMajorMinor';
+import { saveJourney } from '@/src/api/journey';
 import { Journey, UserMarker, makeJourney } from '@/src/types/journey';
 import MapComponent from './MapComponent';
 import WaypointList from './WaypointList';
+import { OverlayToolbar } from '@/src/components/ui/Toolbar';
 
 interface JourneyContextType {
   journey: Journey;
@@ -49,8 +51,21 @@ const JourneyProvider: React.FC<JourneyProviderProps> = ({ journey: loadedJourne
     }
   };
 
+  const onClearButtonClick = () => {
+    setJourney((journey) => ({
+      ...journey,
+      markers: [],
+      waypoints: []
+    }));
+  };
+
+  const onSaveButtonClick = () => {
+    saveJourney(journey);
+    setLastSavedMarkers(journey.markers);
+    setIsModified(false);
+  };
+
   useEffect(() => {
-    console.log(isModified, journey.waypoints, lastSavedMarkers);
     setIsModified(JSON.stringify(journey.markers) !== JSON.stringify(lastSavedMarkers));
   }, [journey.markers, lastSavedMarkers]);
 
@@ -67,6 +82,16 @@ const JourneyProvider: React.FC<JourneyProviderProps> = ({ journey: loadedJourne
   return (
     <JourneyContext.Provider value={memoizedContext}>
       <ResponsiveMajorMinor
+        toolbar={
+          <OverlayToolbar
+            canBeCleared={journey.markers.length > 0}
+            onClearButtonClick={onClearButtonClick}
+            canBeSaved={isModified && journey.waypoints.length > 1}
+            onSaveButtonClick={onSaveButtonClick}
+            canBeShared={journey.waypoints.length > 1}
+            onSharedButtonClick={() => {}}
+          />
+        }
         major={<MapComponent />}
         minor={<WaypointList />}
       />
