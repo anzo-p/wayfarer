@@ -13,10 +13,10 @@ import { DynamoDBModule } from './dynamodb/dynamodb.module';
     GraphQLModule.forRoot({
       driver: ApolloDriver,
       autoSchemaFile: 'schema.gql',
-      sortSchema: true,
+      sortSchema: true
     }),
-    DynamoDBModule,
+    DynamoDBModule
   ],
-  providers: [JourneysResolver, JourneysService, JourneysRepository],
+  providers: [JourneysResolver, JourneysService, JourneysRepository]
 })
 export class AppModule {}

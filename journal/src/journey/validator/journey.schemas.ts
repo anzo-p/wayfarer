@@ -7,6 +7,7 @@ const idSchema = Joi.string().uuid().required();
 
 const maybeString = Joi.string().optional();
 
+//eslint-disable-next-line @typescript-eslint/no-unused-vars
 const positiveNumber = Joi.number().positive();
 
 const coordinateSchema = Joi.object({

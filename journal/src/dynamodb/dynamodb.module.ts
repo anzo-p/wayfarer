@@ -7,15 +7,15 @@ const DynamoDBClientProvider = {
   provide: 'DynamoDBClient',
   useFactory: (configService: ConfigService) => {
     return new DynamoDBClient({
-      region: configService.get('AWS_REGION', 'us-east-1'),
+      region: configService.get('AWS_REGION', 'us-east-1')
     });
   },
-  inject: [ConfigService],
+  inject: [ConfigService]
 };
 
 @Module({
   imports: [ConfigModule],
   providers: [DynamoDBService, DynamoDBClientProvider],
-  exports: [DynamoDBService],
+  exports: [DynamoDBService]
 })
 export class DynamoDBModule {}

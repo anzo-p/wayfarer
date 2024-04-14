@@ -4,7 +4,7 @@ import {
   Logger,
   ConflictException,
   NotFoundException,
-  BadRequestException,
+  BadRequestException
 } from '@nestjs/common';
 import { GqlExceptionFilter } from '@nestjs/graphql';
 import { ApolloError } from 'apollo-server-express';
@@ -14,7 +14,7 @@ import { BadDbDataException } from './errors.custom-errors';
 export class GqlBadRequestException implements GqlExceptionFilter {
   private readonly logger = new Logger(GqlConflictException.name);
 
-  catch(exception: BadRequestException, host: ArgumentsHost) {
+  catch(exception: BadRequestException, unusedHost: ArgumentsHost) {
     return new ApolloError(exception.message, 'INVALID_INPUT');
   }
 }
@@ -23,8 +23,7 @@ export class GqlBadRequestException implements GqlExceptionFilter {
 export class GqlBadDbDataException implements GqlExceptionFilter {
   private readonly logger = new Logger(GqlConflictException.name);
 
-  catch(exception: BadDbDataException, host: ArgumentsHost) {
-    console.log('exception', exception);
+  catch(exception: BadDbDataException, unusedHost: ArgumentsHost) {
     return new ApolloError(exception.message, 'INTERNAL_SERVER_ERROR');
   }
 }
@@ -33,7 +32,7 @@ export class GqlBadDbDataException implements GqlExceptionFilter {
 export class GqlConflictException implements GqlExceptionFilter {
   private readonly logger = new Logger(GqlConflictException.name);
 
-  catch(exception: ConflictException, host: ArgumentsHost) {
+  catch(exception: ConflictException, unusedHost: ArgumentsHost) {
     return new ApolloError(exception.message, 'DUPLICATE_ITEM');
   }
 }
@@ -42,7 +41,7 @@ export class GqlConflictException implements GqlExceptionFilter {
 export class GqlNotFoundException implements GqlExceptionFilter {
   private readonly logger = new Logger(GqlNotFoundException.name);
 
-  catch(exception: NotFoundException, host: ArgumentsHost) {
+  catch(exception: NotFoundException, unusedHost: ArgumentsHost) {
     return new ApolloError(exception.message, 'NOT_FOUND');
   }
 }
