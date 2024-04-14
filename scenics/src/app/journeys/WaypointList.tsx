@@ -1,7 +1,7 @@
 import React from 'react';
 
 import { RouteWaypoint } from '@/src/types/journey';
-import { useWaypoints } from './WaypointContext';
+import { useJourney } from './JourneyContext';
 
 const itemStyle: React.CSSProperties = {
   display: 'flex',
@@ -11,16 +11,16 @@ const itemStyle: React.CSSProperties = {
 };
 
 const WaypointList: React.FC = () => {
-  const { routeWaypoints, onDeleteWaypoint } = useWaypoints();
+  const { journey, removeWaypoint } = useJourney();
 
   return (
     <div>
-      {routeWaypoints
+      {journey.waypoints
         .sort((a, b) => a.label.localeCompare(b.label))
-        .map((waypointItem: RouteWaypoint) => (
-          <div key={waypointItem.waypointId} style={itemStyle}>
-            <span>{waypointItem.label}</span>
-            <button onClick={() => onDeleteWaypoint(waypointItem)}>Delete</button>
+        .map((waypoint: RouteWaypoint) => (
+          <div key={waypoint.waypointId} style={itemStyle}>
+            <span>{waypoint.label}</span>
+            <button onClick={() => removeWaypoint(waypoint.waypointId)}>Delete</button>
           </div>
         ))}
     </div>

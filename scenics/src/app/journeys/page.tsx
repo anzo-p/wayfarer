@@ -1,9 +1,9 @@
 import React from 'react';
 
-import WaypointsProvider from './WaypointContext';
+import JourneyProvider from './JourneyContext';
 
 const RoutePage = () => {
-  return <WaypointsProvider journey={undefined}></WaypointsProvider>;
+  return <JourneyProvider journey={undefined}></JourneyProvider>;
 };
 
 export default RoutePage;

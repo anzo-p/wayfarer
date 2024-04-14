@@ -1,3 +1,5 @@
+import { v4 as uuidv4 } from 'uuid';
+
 export type Coordinate = {
   latitude: number;
   longitude: number;
@@ -32,6 +34,16 @@ export type Journey = {
   waypoints: RouteWaypoint[];
   startWaypointId: string;
   endWaypointId: string;
+  notes?: string;
 };
 
 export type MaybeJourney = Journey | undefined;
+
+export const makeJourney = (): Journey => ({
+  journeyId: uuidv4(),
+  time: new Date(),
+  markers: [],
+  waypoints: [],
+  startWaypointId: '',
+  endWaypointId: ''
+});

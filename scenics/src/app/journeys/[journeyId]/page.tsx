@@ -1,10 +1,10 @@
-import fetchJourneyData from '@/src/services/journal/fetchJourney';
+import fetchJourney from '@/src/services/journal/fetchJourney';
 import { MaybeJourney } from '@/src/types/journey';
-import WaypointsProvider from '../WaypointContext';
+import JourneyProvider from '../JourneyContext';
 
 async function JourneyPage({ params }: { params: { journeyId: string } }) {
-  const journey: MaybeJourney = await fetchJourneyData(params.journeyId);
-  return <WaypointsProvider journey={journey}></WaypointsProvider>;
+  const journey: MaybeJourney = await fetchJourney(params.journeyId);
+  return <JourneyProvider journey={journey}></JourneyProvider>;
 }
 
 export default JourneyPage;
