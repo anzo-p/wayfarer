@@ -1,9 +1,11 @@
 import { makeWaypoint, updateLabels } from '@/src/helpers/waypoints';
 import { Coordinate, RouteWaypoint, UserMarker } from '@/src/types/journey';
 
-export const calculateDirections = async (markers: UserMarker[]): Promise<google.maps.DirectionsResult> => {
+export type MaybeDirections = google.maps.DirectionsResult | undefined;
+
+export const requestDirections = async (markers: UserMarker[]): Promise<MaybeDirections> => {
   if (markers.length < 2) {
-    Promise.resolve([]);
+    return;
   }
 
   const { latitude: originLat, longitude: originLng }: Coordinate = markers[0].coordinate;
@@ -26,7 +28,7 @@ export const calculateDirections = async (markers: UserMarker[]): Promise<google
   });
 };
 
-export const linkMarkersWaypoints = (
+export const linkWaypointsToMarkers = (
   response: google.maps.DirectionsResult,
   userMarkers: UserMarker[],
   routeWaypoints: RouteWaypoint[]
@@ -62,7 +64,7 @@ export const linkMarkersWaypoints = (
   return routeWaypoints;
 };
 
-export const getRouteBounds = (markers: UserMarker[]) => {
+export const getMapBounds = (markers: UserMarker[]) => {
   const bounds = new window.google.maps.LatLngBounds();
   markers.forEach((marker) => {
     bounds.extend(new window.google.maps.LatLng(marker.coordinate.latitude, marker.coordinate.longitude));

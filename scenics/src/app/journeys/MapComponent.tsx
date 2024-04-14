@@ -3,7 +3,7 @@ import { DirectionsRenderer, GoogleMap, Marker, useJsApiLoader } from '@react-go
 import { v4 as uuidv4 } from 'uuid';
 
 import { tooClose } from '@/src/helpers/location';
-import { calculateDirections, getRouteBounds, linkMarkersWaypoints } from '@/src/services/google/directionsApi';
+import { MaybeDirections, requestDirections, getMapBounds, linkWaypointsToMarkers } from '@/src/api/directions';
 import { Coordinate } from '@/src/types/journey';
 import { useJourney } from './JourneyContext';
 
@@ -26,7 +26,7 @@ const center = {
 const MapComponent: React.FC = () => {
   const { isLoaded } = useJsApiLoader({ id: 'google-map-loader', googleMapsApiKey });
   const mapRef = useRef<google.maps.Map>();
-  const [directions, setDirections] = useState<google.maps.DirectionsResult | null>(null);
+  const [directions, setDirections] = useState<MaybeDirections>(undefined);
   const { journey, setJourney, addMarker } = useJourney();
 
   const onLoad = React.useCallback(
@@ -34,7 +34,7 @@ const MapComponent: React.FC = () => {
       mapRef.current = map;
       const markers = journey.markers;
       if (markers.length) {
-        const bounds = getRouteBounds(markers);
+        const bounds = getMapBounds(markers);
         map.fitBounds(bounds);
       }
     },
@@ -61,13 +61,13 @@ const MapComponent: React.FC = () => {
     }
     const getDirections = async () => {
       try {
-        const directions = await calculateDirections(journey.markers);
+        const directions: MaybeDirections = await requestDirections(journey.markers);
         if (!directions) {
           return;
         }
 
         setDirections(directions);
-        const updatedWaypoints = linkMarkersWaypoints(directions, journey.markers, journey.waypoints);
+        const updatedWaypoints = linkWaypointsToMarkers(directions, journey.markers, journey.waypoints);
         const startLoc = directions.routes[0].legs[0].start_location;
         const startWaypoint = updatedWaypoints.find(
           (w) => w.coordinate.latitude === startLoc.lat() && w.coordinate.longitude === startLoc.lng()
@@ -91,14 +91,14 @@ const MapComponent: React.FC = () => {
     if (journey.markers.length >= 2) {
       getDirections();
     } else {
-      setDirections(null);
+      setDirections(undefined);
     }
   }, [isLoaded, journey.markers]);
 
   useEffect(() => {
     const handleResize = () => {
       if (mapRef.current && journey.markers.length) {
-        const bounds = getRouteBounds(journey.markers);
+        const bounds = getMapBounds(journey.markers);
         mapRef.current.fitBounds(bounds);
       }
     };

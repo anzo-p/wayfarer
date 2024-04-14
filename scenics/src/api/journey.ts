@@ -1,6 +1,6 @@
 import { MaybeJourney } from '@/src/types/journey';
 
-async function fetchJourney(journeyId: string): Promise<MaybeJourney> {
+export async function getJourney(journeyId: string): Promise<MaybeJourney> {
   const query = `
     query GetJourney($journeyId: String!) {
       journey(journeyId: $journeyId) {
@@ -28,9 +28,7 @@ async function fetchJourney(journeyId: string): Promise<MaybeJourney> {
         endWaypointId
       }
     }
-    `;
-
-  const variables = { journeyId };
+  `;
 
   const response = await fetch('http://localhost:3001/graphql', {
     method: 'POST',
@@ -38,7 +36,7 @@ async function fetchJourney(journeyId: string): Promise<MaybeJourney> {
       'Content-Type': 'application/json',
       Accept: 'application/json'
     },
-    body: JSON.stringify({ query, variables })
+    body: JSON.stringify({ query, variables: { journeyId } })
   });
 
   if (!response.ok) {
@@ -50,5 +48,3 @@ async function fetchJourney(journeyId: string): Promise<MaybeJourney> {
     return result.data.journey;
   }
 }
-
-export default fetchJourney;
