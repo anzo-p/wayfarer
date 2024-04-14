@@ -1,12 +1,13 @@
 'use client';
-import React, { createContext, useContext, useEffect, useMemo, useState } from 'react';
+import React, { createContext, useCallback, useContext, useEffect, useMemo, useState } from 'react';
 
-import ResponsiveMajorMinor from '@/src/components/ui/ResponsiveMajorMinor';
 import { saveJourney } from '@/src/api/journey';
+import ResponsiveMajorMinor from '@/src/components/ui/ResponsiveMajorMinor';
+import { OverlayToolbar } from '@/src/components/ui/Toolbar';
 import { Journey, UserMarker, makeJourney } from '@/src/types/journey';
+
 import MapComponent from './MapComponent';
 import WaypointList from './WaypointList';
-import { OverlayToolbar } from '@/src/components/ui/Toolbar';
 
 interface JourneyContextType {
   journey: Journey;
@@ -33,23 +34,29 @@ const JourneyProvider: React.FC<JourneyProviderProps> = ({ journey: loadedJourne
   const [lastSavedMarkers, setLastSavedMarkers] = useState<UserMarker[]>(() => loadedJourney?.markers || []);
   const [isModified, setIsModified] = useState(false);
 
-  const addMarker = (marker: UserMarker) => {
-    setJourney({
-      ...journey,
-      markers: [...journey.markers, marker]
-    });
-  };
-
-  const removeWaypoint = (waypointId: string) => {
-    const removable = journey.waypoints.find((waypoint) => waypoint.waypointId === waypointId);
-    if (removable) {
+  const addMarker = useCallback(
+    (marker: UserMarker) => {
       setJourney((journey) => ({
         ...journey,
-        markers: journey.markers.filter((marker) => marker.markerId !== removable.userMarkerId),
-        waypoints: journey.waypoints.filter((waypoint) => waypoint.waypointId !== removable.waypointId)
+        markers: [...journey.markers, marker]
       }));
-    }
-  };
+    },
+    [setJourney]
+  );
+
+  const removeWaypoint = useCallback(
+    (waypointId: string) => {
+      const removable = journey.waypoints.find((waypoint) => waypoint.waypointId === waypointId);
+      if (removable) {
+        setJourney((journey) => ({
+          ...journey,
+          markers: journey.markers.filter((marker) => marker.markerId !== removable.userMarkerId),
+          waypoints: journey.waypoints.filter((waypoint) => waypoint.waypointId !== removable.waypointId)
+        }));
+      }
+    },
+    [setJourney, journey.waypoints]
+  );
 
   const onClearButtonClick = () => {
     setJourney((journey) => ({

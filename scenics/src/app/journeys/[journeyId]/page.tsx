@@ -1,5 +1,6 @@
 import { getJourney } from '@/src/api/journey';
 import { MaybeJourney } from '@/src/types/journey';
+
 import JourneyProvider from '../JourneyContext';
 
 async function JourneyPage({ params }: { params: { journeyId: string } }) {

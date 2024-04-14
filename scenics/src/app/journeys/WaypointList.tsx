@@ -1,6 +1,7 @@
 import React from 'react';
 
 import { RouteWaypoint } from '@/src/types/journey';
+
 import { useJourney } from './JourneyContext';
 
 const itemStyle: React.CSSProperties = {

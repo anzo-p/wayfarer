@@ -20,8 +20,8 @@ const portraitStyles: React.CSSProperties = {
 
 const majorStyles = (isLandscape: boolean): React.CSSProperties =>
   isLandscape
-    ? { backgroundColor: 'lightblue', width: `100%`, height: '100%' }
-    : { backgroundColor: 'lightblue', width: '100%', height: `calc(100vh * 0.618)` };
+    ? { backgroundColor: 'lightblue', width: '100%', height: '100%' }
+    : { backgroundColor: 'lightblue', width: '100%', height: 'calc(100vh * 0.618)' };
 
 const minorStyles: React.CSSProperties = {
   width: '200px'

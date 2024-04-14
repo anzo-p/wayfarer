@@ -1,10 +1,11 @@
-import React, { useEffect, useRef, useState } from 'react';
 import { DirectionsRenderer, GoogleMap, Marker, useJsApiLoader } from '@react-google-maps/api';
+import React, { useEffect, useRef, useState } from 'react';
 import { v4 as uuidv4 } from 'uuid';
 
-import { tooClose } from '@/src/helpers/location';
 import { MaybeDirections, requestDirections, getMapBounds, linkWaypointsToMarkers } from '@/src/api/directions';
+import { tooClose } from '@/src/helpers/location';
 import { Coordinate } from '@/src/types/journey';
+
 import { useJourney } from './JourneyContext';
 
 const googleMapsApiKey = process.env.NEXT_PUBLIC_GOOGLE_MAPS_API_KEY;
@@ -93,7 +94,7 @@ const MapComponent: React.FC = () => {
     } else {
       setDirections(undefined);
     }
-  }, [isLoaded, journey.markers]);
+  }, [isLoaded, journey.waypoints, journey.markers, setJourney]);
 
   useEffect(() => {
     const handleResize = () => {
@@ -105,7 +106,7 @@ const MapComponent: React.FC = () => {
     window.addEventListener('resize', handleResize);
 
     return () => window.removeEventListener('resize', handleResize);
-  }, []);
+  }, [journey.markers]);
 
   return isLoaded ? (
     <GoogleMap mapContainerStyle={containerStyle} center={center} zoom={6} onLoad={onLoad} onClick={onMapClick}>

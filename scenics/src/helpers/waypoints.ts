@@ -1,8 +1,9 @@
 import { v4 as uuidv4 } from 'uuid';
 
 import { Coordinate, RouteWaypoint, UserMarker } from '@/src/types/journey';
-import { alphabethAt } from './string';
+
 import { findNearest } from './location';
+import { alphabethAt } from './string';
 
 export const makeWaypoint = (
   coordinate: Coordinate,
