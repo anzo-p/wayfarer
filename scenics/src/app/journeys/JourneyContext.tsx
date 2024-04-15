@@ -2,8 +2,10 @@
 import React, { createContext, useCallback, useContext, useEffect, useMemo, useState } from 'react';
 
 import { saveJourney } from '@/src/api/journey';
+import InfoBanner from '@/src/components/ui/InfoBanner';
 import ResponsiveMajorMinor from '@/src/components/ui/ResponsiveMajorMinor';
 import { OverlayToolbar } from '@/src/components/ui/Toolbar';
+import { useInfoBanner } from '@/src/hooks/useInfoBanner';
 import { Journey, UserMarker, makeJourney } from '@/src/types/journey';
 
 import MapComponent from './MapComponent';
@@ -38,6 +40,8 @@ const JourneyProvider: React.FC<JourneyProviderProps> = ({ journey: loadedJourne
   const [optimizeWaypoints, toggleOptimize] = useState(true);
   const [lastSavedMarkers, setLastSavedMarkers] = useState<UserMarker[]>(() => loadedJourney?.markers || []);
   const [isModified, setIsModified] = useState(false);
+  const { isBannerVisible, bannerContent, hideBanner, showBanner } = useInfoBanner();
+  const clipboardContent = `http://localhost:3000/journeys/${journey.journeyId}`;
 
   const addMarker = useCallback(
     (marker: UserMarker) => {
@@ -63,6 +67,12 @@ const JourneyProvider: React.FC<JourneyProviderProps> = ({ journey: loadedJourne
     [setJourney, journey.waypoints]
   );
 
+  const saveChanges = async () => {
+    await saveJourney(journey);
+    setLastSavedMarkers(journey.markers);
+    setIsModified(false);
+  };
+
   const onClearButtonClick = () => {
     setJourney((journey) => ({
       ...journey,
@@ -72,9 +82,21 @@ const JourneyProvider: React.FC<JourneyProviderProps> = ({ journey: loadedJourne
   };
 
   const onSaveButtonClick = () => {
-    saveJourney(journey);
-    setLastSavedMarkers(journey.markers);
-    setIsModified(false);
+    saveChanges();
+    showBanner({
+      message: 'Continue later from this state using this link',
+      clipboardContent
+    });
+  };
+
+  const onSharedButtonClick = () => {
+    if (isModified) {
+      saveChanges();
+    }
+    showBanner({
+      message: 'Link to readonoly copy of your journey',
+      clipboardContent
+    });
   };
 
   useEffect(() => {
@@ -103,12 +125,13 @@ const JourneyProvider: React.FC<JourneyProviderProps> = ({ journey: loadedJourne
             canBeSaved={isModified && journey.waypoints.length > 1}
             onSaveButtonClick={onSaveButtonClick}
             canBeShared={journey.waypoints.length > 1}
-            onSharedButtonClick={() => {}}
+            onSharedButtonClick={onSharedButtonClick}
           />
         }
         major={<MapComponent />}
         minor={<WaypointList />}
       />
+      {isBannerVisible && <InfoBanner content={bannerContent} hideAction={hideBanner} />}
     </JourneyContext.Provider>
   );
 };
