@@ -1,11 +1,11 @@
 'use client';
-import React, { createContext, useCallback, useContext, useEffect, useMemo, useState } from 'react';
+import React, { createContext, useContext, useMemo, useState } from 'react';
 
-import { saveJourney } from '@/src/api/journey';
 import InfoBanner from '@/src/components/ui/InfoBanner';
 import ResponsiveMajorMinor from '@/src/components/ui/ResponsiveMajorMinor';
 import { OverlayToolbar } from '@/src/components/ui/Toolbar';
 import { useInfoBanner } from '@/src/hooks/useInfoBanner';
+import { useJourneyState } from '@/src/hooks/useJourneyState';
 import { Journey, UserMarker, makeJourney } from '@/src/types/journey';
 
 import MapComponent from './MapComponent';
@@ -36,42 +36,12 @@ export interface JourneyProviderProps {
 }
 
 const JourneyProvider: React.FC<JourneyProviderProps> = ({ journey: loadedJourney }) => {
-  const [journey, setJourney] = useState<Journey>(loadedJourney || makeJourney());
+  const { journey, setJourney, addMarker, removeWaypoint, isModified, saveChanges } = useJourneyState(
+    loadedJourney || makeJourney()
+  );
+  const { bannerContent, isBannerVisible, showBanner, hideBanner } = useInfoBanner();
   const [optimizeWaypoints, toggleOptimize] = useState(true);
-  const [lastSavedMarkers, setLastSavedMarkers] = useState<UserMarker[]>(() => loadedJourney?.markers || []);
-  const [isModified, setIsModified] = useState(false);
-  const { isBannerVisible, bannerContent, hideBanner, showBanner } = useInfoBanner();
   const clipboardContent = `http://localhost:3000/journeys/${journey.journeyId}`;
-
-  const addMarker = useCallback(
-    (marker: UserMarker) => {
-      setJourney((journey) => ({
-        ...journey,
-        markers: [...journey.markers, marker]
-      }));
-    },
-    [setJourney]
-  );
-
-  const removeWaypoint = useCallback(
-    (waypointId: string) => {
-      const removable = journey.waypoints.find((waypoint) => waypoint.waypointId === waypointId);
-      if (removable) {
-        setJourney((journey) => ({
-          ...journey,
-          markers: journey.markers.filter((marker) => marker.markerId !== removable.userMarkerId),
-          waypoints: journey.waypoints.filter((waypoint) => waypoint.waypointId !== removable.waypointId)
-        }));
-      }
-    },
-    [setJourney, journey.waypoints]
-  );
-
-  const saveChanges = async () => {
-    await saveJourney(journey);
-    setLastSavedMarkers(journey.markers);
-    setIsModified(false);
-  };
 
   const onClearButtonClick = () => {
     setJourney((journey) => ({
@@ -98,10 +68,6 @@ const JourneyProvider: React.FC<JourneyProviderProps> = ({ journey: loadedJourne
       clipboardContent
     });
   };
-
-  useEffect(() => {
-    setIsModified(JSON.stringify(journey.markers) !== JSON.stringify(lastSavedMarkers));
-  }, [journey.markers, lastSavedMarkers]);
 
   const memoizedContext = useMemo(
     () => ({
