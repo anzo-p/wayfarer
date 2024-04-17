@@ -18,3 +18,5 @@ services:
       - '3000:3000'
     env_file:
       - './planner/.env'
+    environment:
+      - NEXT_PUBLIC_JOURNAL_SERVICE_URL=http://journal:3001
