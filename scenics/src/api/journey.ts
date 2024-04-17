@@ -30,7 +30,7 @@ export async function getJourney(journeyId: string): Promise<MaybeJourney> {
     }
   `;
 
-  const response = await fetch('http://localhost:3001/graphql', {
+  const response = await fetch(`${process.env.NEXT_PUBLIC_JOURNAL_SERVICE_URL}/graphql`, {
     method: 'POST',
     headers: {
       'Content-Type': 'application/json',
@@ -56,7 +56,7 @@ export async function saveJourney(newJourney: Journey): Promise<void> {
     }
   `;
 
-  const response = await fetch('http://localhost:3001/graphql', {
+  const response = await fetch(`${process.env.NEXT_PUBLIC_JOURNAL_SERVICE_URL}/graphql`, {
     method: 'POST',
     headers: {
       'Content-Type': 'application/json',

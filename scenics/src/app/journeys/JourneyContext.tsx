@@ -41,7 +41,7 @@ const JourneyProvider: React.FC<JourneyProviderProps> = ({ journey: loadedJourne
   );
   const { bannerContent, isBannerVisible, showBanner, hideBanner } = useInfoBanner();
   const [optimizeWaypoints, toggleOptimize] = useState(true);
-  const clipboardContent = `http://localhost:3000/journeys/${journey.journeyId}`;
+  const clipboardContent = `${process.env.NEXT_PUBLIC_JOURNAL_SERVICE_URL}/journeys/${journey.journeyId}`;
 
   const onClearButtonClick = () => {
     setJourney((journey) => ({
