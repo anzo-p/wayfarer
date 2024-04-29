@@ -1,10 +1,14 @@
 import { useState } from 'react';
 
-import { InfoBannerContent } from '@/src/components/ui/InfoBanner';
+import { BannerTypeEnum, InfoBannerContent } from '@/src/components/ui/InfoBanner';
 
 export const useInfoBanner = () => {
   const [isBannerVisible, setShowBanner] = useState(false);
-  const [bannerContent, setBannerContent] = useState<InfoBannerContent>({ message: '', clipboardContent: '' });
+  const [bannerContent, setBannerContent] = useState<InfoBannerContent>({
+    bannerType: BannerTypeEnum.INFO,
+    message: '',
+    clipboardContent: ''
+  });
 
   const showBanner = (content: InfoBannerContent) => {
     setBannerContent(content);

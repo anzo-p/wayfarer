@@ -1,6 +1,8 @@
 import React, { useEffect, useState } from 'react';
 
 import { MaybeDirections, requestDirections } from '@/src/api/directions';
+import { BannerTypeEnum } from '@/src/components/ui/InfoBanner';
+import { detectDetour } from '@/src/helpers/directions';
 import { alphabethAt } from '@/src/helpers/string';
 import { updateAddresses } from '@/src/helpers/waypoints';
 import { RouteWaypoint } from '@/src/types/journey';
@@ -15,11 +17,10 @@ const itemStyle: React.CSSProperties = {
 };
 
 const WaypointList: React.FC = () => {
-  const { journey, mapLoaded, removeWaypoint, directions, setDirections } = useJourney();
+  const { journey, mapLoaded, removeWaypoint, directions, setDirections, showBanner } = useJourney();
   const [lastDirections, setLastDirections] = useState<MaybeDirections>(undefined);
 
   const onRequestDirections = async () => {
-    console.log('Requesting directions', mapLoaded);
     if (!mapLoaded) {
       return;
     }
@@ -33,6 +34,14 @@ const WaypointList: React.FC = () => {
       if (!newDirections) {
         console.log('Google maps api responded no directions');
         return;
+      }
+
+      if (detectDetour(newDirections)) {
+        showBanner({
+          bannerType: BannerTypeEnum.WARNING,
+          message:
+            'Unexpected detour detected. Intended route might not be possible due to restrictions or road closures.'
+        });
       }
 
       setDirections(newDirections);

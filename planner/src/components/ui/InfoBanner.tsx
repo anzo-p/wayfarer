@@ -1,19 +1,29 @@
 import React from 'react';
 
-const bannerStyles: React.CSSProperties = {
-  width: '99%',
-  height: '50px',
-  position: 'fixed',
-  top: 0,
-  left: 0,
-  backgroundColor: '#74b4f9',
-  color: '#333',
-  padding: '10px',
-  boxShadow: '0 -2px 5px rgba(0,0,0,0.1)',
-  display: 'flex',
-  justifyContent: 'space-between',
-  alignItems: 'center',
-  zIndex: 100
+const getBannerStyles = (type: BannerTypeEnum): React.CSSProperties => {
+  const baseStyles: React.CSSProperties = {
+    width: '99%',
+    height: '50px',
+    position: 'fixed',
+    top: 0,
+    left: 0,
+    color: '#333',
+    padding: '10px',
+    boxShadow: '0 -2px 5px rgba(0,0,0,0.1)',
+    display: 'flex',
+    justifyContent: 'space-between',
+    alignItems: 'center',
+    zIndex: 100
+  };
+
+  const backgroundColors = {
+    info: '#74b4f9',
+    success: '#4CAF50',
+    error: '#F44336',
+    warning: '#FF9800'
+  };
+
+  return { ...baseStyles, backgroundColor: backgroundColors[type] };
 };
 
 const dismissButtonStyles: React.CSSProperties = {
@@ -26,7 +36,15 @@ const dismissButtonStyles: React.CSSProperties = {
   padding: '0 5px'
 };
 
+export enum BannerTypeEnum {
+  INFO = 'info',
+  SUCCESS = 'success',
+  ERROR = 'error',
+  WARNING = 'warning'
+}
+
 export interface InfoBannerContent {
+  bannerType: BannerTypeEnum;
   message: string;
   clipboardContent?: string;
 }
@@ -36,7 +54,7 @@ export interface InfoBannerProps {
   hideAction: () => void;
 }
 
-const InfoBanner: React.FC<InfoBannerProps> = ({ content: { message, clipboardContent }, hideAction }) => {
+const InfoBanner: React.FC<InfoBannerProps> = ({ content: { bannerType, message, clipboardContent }, hideAction }) => {
   if (!message) return null;
 
   const copyToClipboard = async () => {
@@ -48,7 +66,7 @@ const InfoBanner: React.FC<InfoBannerProps> = ({ content: { message, clipboardCo
   };
 
   return (
-    <div id="infoBanner" style={bannerStyles}>
+    <div id="infoBanner" style={getBannerStyles(bannerType)}>
       <span>
         {message}
         {clipboardContent ? `: ${clipboardContent}` : ''}

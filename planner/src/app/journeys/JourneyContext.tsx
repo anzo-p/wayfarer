@@ -2,7 +2,7 @@
 import React, { createContext, useContext, useMemo, useState } from 'react';
 
 import { MaybeDirections } from '@/src/api/directions';
-import InfoBanner from '@/src/components/ui/InfoBanner';
+import InfoBanner, { BannerTypeEnum } from '@/src/components/ui/InfoBanner';
 import ResponsiveMajorMinor from '@/src/components/ui/ResponsiveMajorMinor';
 import { OverlayToolbar } from '@/src/components/ui/Toolbar';
 import { useInfoBanner } from '@/src/hooks/useInfoBanner';
@@ -20,6 +20,7 @@ interface JourneyContextType {
   removeWaypoint: (waypointId: string) => void;
   directions: MaybeDirections;
   setDirections: React.Dispatch<React.SetStateAction<MaybeDirections | undefined>>;
+  showBanner: (content: { bannerType: BannerTypeEnum; message: string; clipboardContent?: string }) => void;
 }
 
 const JourneyContext = createContext<JourneyContextType>({
@@ -29,7 +30,8 @@ const JourneyContext = createContext<JourneyContextType>({
   addWaypoint: () => {},
   removeWaypoint: () => {},
   directions: undefined,
-  setDirections: () => {}
+  setDirections: () => {},
+  showBanner: () => {}
 });
 
 export const useJourney = () => useContext(JourneyContext);
@@ -59,6 +61,7 @@ const JourneyProvider: React.FC<JourneyProviderProps> = ({ journey: loadedJourne
     saveChanges();
     showBanner({
       message: 'Continue later from this state using this link',
+      bannerType: BannerTypeEnum.SUCCESS,
       clipboardContent
     });
   };
@@ -69,6 +72,7 @@ const JourneyProvider: React.FC<JourneyProviderProps> = ({ journey: loadedJourne
     }
     showBanner({
       message: 'Link to readonoly copy of your journey',
+      bannerType: BannerTypeEnum.INFO,
       clipboardContent
     });
   };
@@ -81,9 +85,10 @@ const JourneyProvider: React.FC<JourneyProviderProps> = ({ journey: loadedJourne
       addWaypoint,
       removeWaypoint,
       directions,
-      setDirections
+      setDirections,
+      showBanner
     }),
-    [journey, mapLoaded, setMapLoaded, addWaypoint, removeWaypoint, directions, setDirections]
+    [journey, mapLoaded, setMapLoaded, addWaypoint, removeWaypoint, directions, setDirections, showBanner]
   );
 
   return (
