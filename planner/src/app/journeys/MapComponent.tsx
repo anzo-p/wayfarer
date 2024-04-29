@@ -2,9 +2,9 @@ import { DirectionsRenderer, GoogleMap, Marker, useJsApiLoader } from '@react-go
 import React, { useEffect, useRef } from 'react';
 import { v4 as uuidv4 } from 'uuid';
 
-import { getMapBounds } from '@/src/api/directions';
-import { tooClose } from '@/src/helpers/location';
+import { getMapBounds } from '@/src/helpers/directions';
 import { alphabethAt } from '@/src/helpers/string';
+import { tooClose } from '@/src/helpers/waypoints';
 import { Coordinate } from '@/src/types/journey';
 
 import { useJourney } from './JourneyContext';

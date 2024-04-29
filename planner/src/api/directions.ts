@@ -1,6 +1,11 @@
+import { calculateTotalDistance } from '@/src/helpers/directions';
 import { Coordinate, RouteWaypoint } from '@/src/types/journey';
 
 export type MaybeDirections = google.maps.DirectionsResult | undefined;
+
+type RouteCriterion = 'distance' | 'duration';
+
+const lengthSensationThreshold = Number(process.env.NEXT_PUBLIC_ROUTE_LENGTH_SENSATION_THRESHOLD);
 
 export const requestDirections = async (waypoints: RouteWaypoint[]): Promise<MaybeDirections> => {
   if (waypoints.length < 2) {
@@ -21,19 +26,34 @@ export const requestDirections = async (waypoints: RouteWaypoint[]): Promise<May
   });
 
   console.log('Call Google Maps Directions');
-  return new google.maps.DirectionsService().route({
+  const directions = await new google.maps.DirectionsService().route({
     origin: new google.maps.LatLng(originLat, originLng),
     destination: new google.maps.LatLng(destLat, destLng),
     waypoints: middleMarkers,
     optimizeWaypoints: false,
-    travelMode: google.maps.TravelMode.DRIVING
+    travelMode: google.maps.TravelMode.DRIVING,
+    provideRouteAlternatives: true
   });
+
+  const optimalRoute =
+    calculateTotalDistance(directions) < lengthSensationThreshold
+      ? getOptimalRoute(directions, 'distance')
+      : getOptimalRoute(directions, 'duration');
+
+  return {
+    ...directions,
+    routes: [optimalRoute]
+  };
 };
 
-export const getMapBounds = (waypoints: RouteWaypoint[]) => {
-  const bounds = new window.google.maps.LatLngBounds();
-  waypoints.forEach((waypoint) => {
-    bounds.extend(new window.google.maps.LatLng(waypoint.coordinate.latitude, waypoint.coordinate.longitude));
+const getOptimalRoute = (
+  directions: google.maps.DirectionsResult,
+  criterion: RouteCriterion
+): google.maps.DirectionsRoute => {
+  return directions.routes.reduce((optimal, current) => {
+    const currentVal = current.legs.reduce((sum, leg) => sum + (leg[criterion]?.value ?? Infinity), 0);
+    const optimalVal = optimal.legs.reduce((sum, leg) => sum + (leg[criterion]?.value ?? Infinity), 0);
+
+    return currentVal < optimalVal ? current : optimal;
   });
-  return bounds;
 };
