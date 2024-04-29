@@ -4,6 +4,7 @@ import { v4 as uuidv4 } from 'uuid';
 
 import { getMapBounds } from '@/src/api/directions';
 import { tooClose } from '@/src/helpers/location';
+import { alphabethAt } from '@/src/helpers/string';
 import { Coordinate } from '@/src/types/journey';
 
 import { useJourney } from './JourneyContext';
@@ -27,31 +28,32 @@ const center = {
 const MapComponent: React.FC = () => {
   const { isLoaded } = useJsApiLoader({ id: 'google-map-loader', googleMapsApiKey });
   const mapRef = useRef<google.maps.Map>();
-  const { journey, setMapLoaded, addMarker, directions } = useJourney();
+  const { journey, setMapLoaded, addWaypoint, directions } = useJourney();
 
   const onLoad = React.useCallback(
     function callback(map: google.maps.Map) {
       mapRef.current = map;
-      const markers = journey.markers;
-      if (markers.length) {
-        const bounds = getMapBounds(markers);
+      const waypoints = journey.waypoints;
+      if (waypoints.length) {
+        const bounds = getMapBounds(waypoints);
         map.fitBounds(bounds);
       }
     },
-    [journey.markers]
+    [journey.waypoints]
   );
 
   const onMapClick = (event: google.maps.MapMouseEvent) => {
     const coordinate: Coordinate = { latitude: event.latLng!.lat(), longitude: event.latLng!.lng() };
 
-    if (tooClose(coordinate, journey.markers)) {
-      console.log('Marker too close to an existing marker.');
+    if (tooClose(coordinate, journey.waypoints)) {
+      console.log('Marker too close to an existing waypoint.');
       return;
     }
 
-    addMarker({
-      markerId: uuidv4(),
-      coordinate
+    addWaypoint({
+      waypointId: uuidv4(),
+      coordinate,
+      label: alphabethAt(journey.waypoints.length)
     });
   };
 
@@ -63,30 +65,26 @@ const MapComponent: React.FC = () => {
 
   useEffect(() => {
     const handleResize = () => {
-      if (mapRef.current && journey.markers.length) {
-        const bounds = getMapBounds(journey.markers);
+      if (mapRef.current && journey.waypoints.length) {
+        const bounds = getMapBounds(journey.waypoints);
         mapRef.current.fitBounds(bounds);
       }
     };
     window.addEventListener('resize', handleResize);
 
     return () => window.removeEventListener('resize', handleResize);
-  }, [journey.markers]);
+  }, [journey.waypoints]);
 
   return isLoaded ? (
     <GoogleMap mapContainerStyle={containerStyle} center={center} zoom={6} onLoad={onLoad} onClick={onMapClick}>
       <>
-        {journey.waypoints.length > 0
-          ? journey.waypoints.map((waypoint, index) => (
-              <Marker
-                key={index}
-                position={{ lat: waypoint.coordinate.latitude, lng: waypoint.coordinate.longitude }}
-                label={waypoint.label}
-              />
-            ))
-          : journey.markers.map((marker, index) => (
-              <Marker key={index} position={{ lat: marker.coordinate.latitude, lng: marker.coordinate.longitude }} />
-            ))}
+        {journey.waypoints.map((waypoint, index) => (
+          <Marker
+            key={index}
+            position={{ lat: waypoint.coordinate.latitude, lng: waypoint.coordinate.longitude }}
+            label={waypoint.label}
+          />
+        ))}
         {directions && <DirectionsRenderer directions={directions} options={{ suppressMarkers: true }} />}
       </>
     </GoogleMap>

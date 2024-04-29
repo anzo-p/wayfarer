@@ -1,18 +1,18 @@
 import { useCallback, useEffect, useState } from 'react';
 
 import { saveJourney } from '@/src/api/journey';
-import { Journey, UserMarker, makeJourney } from '@/src/types/journey';
+import { Journey, RouteWaypoint, makeJourney } from '@/src/types/journey';
 
 export const useJourneyState = (initialJourney: Journey) => {
   const [journey, setJourney] = useState(initialJourney || makeJourney());
   const [isModified, setModified] = useState(false);
-  const [lastSavedMarkers, setLastSavedMarkers] = useState<UserMarker[]>(journey.markers || []);
+  const [lastSavedWaypoints, setLastSavedWaypoints] = useState<RouteWaypoint[]>(journey.waypoints || []);
 
-  const addMarker = useCallback(
-    (marker: UserMarker) => {
+  const addWaypoint = useCallback(
+    (waypoint: RouteWaypoint) => {
       setJourney((journey) => ({
         ...journey,
-        markers: [...journey.markers, marker]
+        waypoints: [...journey.waypoints, waypoint]
       }));
     },
     [setJourney]
@@ -24,7 +24,6 @@ export const useJourneyState = (initialJourney: Journey) => {
       if (removable) {
         setJourney((journey) => ({
           ...journey,
-          markers: journey.markers.filter((marker) => marker.markerId !== removable.userMarkerId),
           waypoints: journey.waypoints.filter((waypoint) => waypoint.waypointId !== waypointId)
         }));
       }
@@ -35,17 +34,17 @@ export const useJourneyState = (initialJourney: Journey) => {
   const saveChanges = async () => {
     await saveJourney(journey);
     setModified(false);
-    setLastSavedMarkers(journey.markers);
+    setLastSavedWaypoints(journey.waypoints);
   };
 
   useEffect(() => {
-    setModified(JSON.stringify(journey.markers) !== JSON.stringify(lastSavedMarkers));
-  }, [journey.markers, lastSavedMarkers]);
+    setModified(JSON.stringify(journey.waypoints) !== JSON.stringify(lastSavedWaypoints));
+  }, [journey.waypoints, lastSavedWaypoints]);
 
   return {
     journey,
     setJourney,
-    addMarker,
+    addWaypoint,
     removeWaypoint,
     isModified,
     saveChanges

@@ -1,7 +1,7 @@
 import React, { useEffect, useState } from 'react';
 
 import { MaybeDirections, requestDirections } from '@/src/api/directions';
-import { getStartAndFinish, refreshWaypoints } from '@/src/helpers/waypoints';
+import { updateAddresses } from '@/src/helpers/waypoints';
 import { RouteWaypoint } from '@/src/types/journey';
 
 import { useJourney } from './JourneyContext';
@@ -14,7 +14,7 @@ const itemStyle: React.CSSProperties = {
 };
 
 const WaypointList: React.FC = () => {
-  const { journey, setJourney, mapLoaded, removeWaypoint, directions, setDirections } = useJourney();
+  const { journey, mapLoaded, removeWaypoint, directions, setDirections } = useJourney();
   const [lastDirections, setLastDirections] = useState<MaybeDirections>(undefined);
 
   const onRequestDirections = async () => {
@@ -22,29 +22,21 @@ const WaypointList: React.FC = () => {
     if (!mapLoaded) {
       return;
     }
-    if (journey.markers.length < 2) {
+    if (journey.waypoints.length < 2) {
       setDirections(undefined);
       return;
     }
 
     try {
-      const route: MaybeDirections = await requestDirections(journey.markers);
-      if (!route) {
+      const newDirections: MaybeDirections = await requestDirections(journey.waypoints);
+      if (!newDirections) {
+        console.log('Google maps api responded no directions');
         return;
       }
 
-      setDirections(route);
-      setLastDirections(route);
-
-      const waypoints = refreshWaypoints(route, journey.markers, journey.waypoints);
-      const { start, finish } = getStartAndFinish(route, waypoints);
-
-      setJourney((journey) => ({
-        ...journey,
-        waypoints: waypoints,
-        startWaypointId: journey.startWaypointId || start?.waypointId || '',
-        endWaypointId: journey.markers.length > 0 ? finish?.waypointId || '' : journey.endWaypointId || ''
-      }));
+      setDirections(newDirections);
+      setLastDirections(newDirections);
+      updateAddresses(newDirections.routes[0]?.legs, journey.waypoints);
     } catch (error) {
       console.error('Error calculating route:', error);
     }
@@ -70,7 +62,7 @@ const WaypointList: React.FC = () => {
           </div>
         ))}
       <button
-        disabled={(directions && directions === lastDirections) || journey.markers.length < 2}
+        disabled={(directions && directions === lastDirections) || journey.waypoints.length < 2}
         onClick={() => onRequestDirections()}
       >
         Get directions

@@ -1,8 +1,8 @@
-import { Coordinate, UserMarker } from '@/src/types/journey';
+import { Coordinate, RouteWaypoint } from '@/src/types/journey';
 
 const proximityThreshold = 0.0001;
 
-export const findNearest = (waypoints: UserMarker[], coordinate: Coordinate): UserMarker | undefined => {
+export const findNearest = (waypoints: RouteWaypoint[], coordinate: Coordinate): RouteWaypoint | undefined => {
   let nearest = undefined;
   let minDistance = Infinity;
 
@@ -17,7 +17,11 @@ export const findNearest = (waypoints: UserMarker[], coordinate: Coordinate): Us
   return nearest;
 };
 
-export const tooClose = (coordinate: Coordinate, waypoints: UserMarker[], threshold: number = proximityThreshold) => {
+export const tooClose = (
+  coordinate: Coordinate,
+  waypoints: RouteWaypoint[],
+  threshold: number = proximityThreshold
+) => {
   return waypoints.some((waypoint) => euclidianDistance(coordinate, waypoint.coordinate) < threshold);
 };
 

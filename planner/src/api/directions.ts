@@ -1,17 +1,19 @@
-import { Coordinate, UserMarker } from '@/src/types/journey';
+import { Coordinate, RouteWaypoint } from '@/src/types/journey';
 
 export type MaybeDirections = google.maps.DirectionsResult | undefined;
 
-export const requestDirections = async (markers: UserMarker[]): Promise<MaybeDirections> => {
-  if (markers.length < 2) {
+export const requestDirections = async (waypoints: RouteWaypoint[]): Promise<MaybeDirections> => {
+  if (waypoints.length < 2) {
     return;
   }
 
-  const { latitude: originLat, longitude: originLng }: Coordinate = markers[0].coordinate;
-  const { latitude: destLat, longitude: destLng }: Coordinate = markers[markers.length - 1].coordinate;
+  waypoints.sort((a, b) => a.label.localeCompare(b.label));
 
-  const middleMarkers: google.maps.DirectionsWaypoint[] = markers.slice(1, markers.length - 1).map((marker) => {
-    const { latitude, longitude } = marker.coordinate;
+  const { latitude: originLat, longitude: originLng }: Coordinate = waypoints[0].coordinate;
+  const { latitude: destLat, longitude: destLng }: Coordinate = waypoints[waypoints.length - 1].coordinate;
+
+  const middleMarkers: google.maps.DirectionsWaypoint[] = waypoints.slice(1, waypoints.length - 1).map((waypoint) => {
+    const { latitude, longitude } = waypoint.coordinate;
     return {
       location: new google.maps.LatLng(latitude, longitude),
       stopover: true
@@ -28,10 +30,10 @@ export const requestDirections = async (markers: UserMarker[]): Promise<MaybeDir
   });
 };
 
-export const getMapBounds = (markers: UserMarker[]) => {
+export const getMapBounds = (waypoints: RouteWaypoint[]) => {
   const bounds = new window.google.maps.LatLngBounds();
-  markers.forEach((marker) => {
-    bounds.extend(new window.google.maps.LatLng(marker.coordinate.latitude, marker.coordinate.longitude));
+  waypoints.forEach((waypoint) => {
+    bounds.extend(new window.google.maps.LatLng(waypoint.coordinate.latitude, waypoint.coordinate.longitude));
   });
   return bounds;
 };

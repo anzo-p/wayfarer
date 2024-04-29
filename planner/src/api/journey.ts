@@ -7,16 +7,8 @@ export async function getJourney(journeyId: string): Promise<MaybeJourney> {
         journeyId
         time
         title
-        markers {
-          markerId
-          coordinate {
-            latitude
-            longitude
-          }
-        }
         waypoints {
           waypointId
-          userMarkerId
           coordinate {
             latitude
             longitude
@@ -24,8 +16,6 @@ export async function getJourney(journeyId: string): Promise<MaybeJourney> {
           label
           address
         }
-        startWaypointId
-        endWaypointId
       }
     }
   `;

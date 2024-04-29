@@ -7,17 +7,16 @@ import ResponsiveMajorMinor from '@/src/components/ui/ResponsiveMajorMinor';
 import { OverlayToolbar } from '@/src/components/ui/Toolbar';
 import { useInfoBanner } from '@/src/hooks/useInfoBanner';
 import { useJourneyState } from '@/src/hooks/useJourneyState';
-import { Journey, UserMarker, makeJourney } from '@/src/types/journey';
+import { Journey, RouteWaypoint, makeJourney } from '@/src/types/journey';
 
 import MapComponent from './MapComponent';
 import WaypointList from './WaypointList';
 
 interface JourneyContextType {
   journey: Journey;
-  setJourney: React.Dispatch<React.SetStateAction<Journey>>;
   mapLoaded: boolean;
   setMapLoaded: React.Dispatch<React.SetStateAction<boolean>>;
-  addMarker: (marker: UserMarker) => void;
+  addWaypoint: (waypoint: RouteWaypoint) => void;
   removeWaypoint: (waypointId: string) => void;
   directions: MaybeDirections;
   setDirections: React.Dispatch<React.SetStateAction<MaybeDirections | undefined>>;
@@ -25,10 +24,9 @@ interface JourneyContextType {
 
 const JourneyContext = createContext<JourneyContextType>({
   journey: makeJourney(),
-  setJourney: () => {},
   mapLoaded: false,
   setMapLoaded: () => {},
-  addMarker: () => {},
+  addWaypoint: () => {},
   removeWaypoint: () => {},
   directions: undefined,
   setDirections: () => {}
@@ -41,18 +39,18 @@ export interface JourneyProviderProps {
 }
 
 const JourneyProvider: React.FC<JourneyProviderProps> = ({ journey: loadedJourney }) => {
-  const { journey, setJourney, addMarker, removeWaypoint, isModified, saveChanges } = useJourneyState(
+  const { journey, setJourney, addWaypoint, removeWaypoint, isModified, saveChanges } = useJourneyState(
     loadedJourney || makeJourney()
   );
   const [mapLoaded, setMapLoaded] = useState(false);
   const [directions, setDirections] = useState<MaybeDirections>(undefined);
   const { bannerContent, isBannerVisible, showBanner, hideBanner } = useInfoBanner();
-  const clipboardContent = `${process.env.NEXT_PUBLIC_JOURNAL_SERVICE_URL}/journeys/${journey.journeyId}`;
+
+  const clipboardContent = `http://127.0.0.1:3000/journeys/${journey.journeyId}`;
 
   const onClearButtonClick = () => {
     setJourney((journey) => ({
       ...journey,
-      markers: [],
       waypoints: []
     }));
   };
@@ -78,15 +76,14 @@ const JourneyProvider: React.FC<JourneyProviderProps> = ({ journey: loadedJourne
   const memoizedContext = useMemo(
     () => ({
       journey,
-      setJourney,
       mapLoaded,
       setMapLoaded,
-      addMarker,
+      addWaypoint,
       removeWaypoint,
       directions,
       setDirections
     }),
-    [journey, setJourney, mapLoaded, setMapLoaded, addMarker, removeWaypoint, directions, setDirections]
+    [journey, mapLoaded, setMapLoaded, addWaypoint, removeWaypoint, directions, setDirections]
   );
 
   return (
@@ -94,7 +91,7 @@ const JourneyProvider: React.FC<JourneyProviderProps> = ({ journey: loadedJourne
       <ResponsiveMajorMinor
         toolbar={
           <OverlayToolbar
-            canBeCleared={journey.markers.length > 0}
+            canBeCleared={journey.waypoints.length > 0}
             onClearButtonClick={onClearButtonClick}
             canBeSaved={isModified && journey.waypoints.length > 1}
             onSaveButtonClick={onSaveButtonClick}
