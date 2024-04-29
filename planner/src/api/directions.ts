@@ -2,14 +2,7 @@ import { Coordinate, UserMarker } from '@/src/types/journey';
 
 export type MaybeDirections = google.maps.DirectionsResult | undefined;
 
-type DirectionsOptions = {
-  optimizeWaypoints: boolean;
-};
-
-export const requestDirections = async (
-  markers: UserMarker[],
-  options: DirectionsOptions = { optimizeWaypoints: false }
-): Promise<MaybeDirections> => {
+export const requestDirections = async (markers: UserMarker[]): Promise<MaybeDirections> => {
   if (markers.length < 2) {
     return;
   }
@@ -30,7 +23,7 @@ export const requestDirections = async (
     origin: new google.maps.LatLng(originLat, originLng),
     destination: new google.maps.LatLng(destLat, destLng),
     waypoints: middleMarkers,
-    optimizeWaypoints: options.optimizeWaypoints,
+    optimizeWaypoints: false,
     travelMode: google.maps.TravelMode.DRIVING
   });
 };

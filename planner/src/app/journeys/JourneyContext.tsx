@@ -21,8 +21,6 @@ interface JourneyContextType {
   removeWaypoint: (waypointId: string) => void;
   directions: MaybeDirections;
   setDirections: React.Dispatch<React.SetStateAction<MaybeDirections | undefined>>;
-  optimizeWaypoints: boolean;
-  toggleOptimize: React.Dispatch<React.SetStateAction<boolean>>;
 }
 
 const JourneyContext = createContext<JourneyContextType>({
@@ -33,9 +31,7 @@ const JourneyContext = createContext<JourneyContextType>({
   addMarker: () => {},
   removeWaypoint: () => {},
   directions: undefined,
-  setDirections: () => {},
-  optimizeWaypoints: true,
-  toggleOptimize: () => {}
+  setDirections: () => {}
 });
 
 export const useJourney = () => useContext(JourneyContext);
@@ -50,7 +46,6 @@ const JourneyProvider: React.FC<JourneyProviderProps> = ({ journey: loadedJourne
   );
   const [mapLoaded, setMapLoaded] = useState(false);
   const [directions, setDirections] = useState<MaybeDirections>(undefined);
-  const [optimizeWaypoints, toggleOptimize] = useState(true);
   const { bannerContent, isBannerVisible, showBanner, hideBanner } = useInfoBanner();
   const clipboardContent = `${process.env.NEXT_PUBLIC_JOURNAL_SERVICE_URL}/journeys/${journey.journeyId}`;
 
@@ -89,22 +84,9 @@ const JourneyProvider: React.FC<JourneyProviderProps> = ({ journey: loadedJourne
       addMarker,
       removeWaypoint,
       directions,
-      setDirections,
-      optimizeWaypoints,
-      toggleOptimize
+      setDirections
     }),
-    [
-      journey,
-      setJourney,
-      mapLoaded,
-      setMapLoaded,
-      addMarker,
-      removeWaypoint,
-      directions,
-      setDirections,
-      optimizeWaypoints,
-      toggleOptimize
-    ]
+    [journey, setJourney, mapLoaded, setMapLoaded, addMarker, removeWaypoint, directions, setDirections]
   );
 
   return (

@@ -14,16 +14,7 @@ const itemStyle: React.CSSProperties = {
 };
 
 const WaypointList: React.FC = () => {
-  const {
-    journey,
-    setJourney,
-    mapLoaded,
-    removeWaypoint,
-    directions,
-    setDirections,
-    optimizeWaypoints,
-    toggleOptimize
-  } = useJourney();
+  const { journey, setJourney, mapLoaded, removeWaypoint, directions, setDirections } = useJourney();
   const [lastDirections, setLastDirections] = useState<MaybeDirections>(undefined);
 
   const onRequestDirections = async () => {
@@ -37,7 +28,7 @@ const WaypointList: React.FC = () => {
     }
 
     try {
-      const route: MaybeDirections = await requestDirections(journey.markers, { optimizeWaypoints });
+      const route: MaybeDirections = await requestDirections(journey.markers);
       if (!route) {
         return;
       }
@@ -83,9 +74,6 @@ const WaypointList: React.FC = () => {
         onClick={() => onRequestDirections()}
       >
         Get directions
-      </button>
-      <button onClick={() => toggleOptimize(!optimizeWaypoints)}>
-        Waypoint optimization {optimizeWaypoints ? 'On' : 'Off'}
       </button>
     </div>
   );
