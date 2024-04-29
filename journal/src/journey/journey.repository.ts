@@ -51,7 +51,7 @@ export class JourneysRepository {
       if (err instanceof Error && err.name === 'ConditionalCheckFailedException') {
         throw new ConflictException('journey already exists');
       }
-      throw new Error('Failed to save journey');
+      throw new Error(`Failed to save journey: ${err.toString()}`);
     }
 
     const journeyId = journey.journeyId;
