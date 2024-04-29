@@ -1,6 +1,7 @@
 import React, { useEffect, useState } from 'react';
 
 import { MaybeDirections, requestDirections } from '@/src/api/directions';
+import { alphabethAt } from '@/src/helpers/string';
 import { updateAddresses } from '@/src/helpers/waypoints';
 import { RouteWaypoint } from '@/src/types/journey';
 
@@ -54,10 +55,10 @@ const WaypointList: React.FC = () => {
   return (
     <div>
       {journey.waypoints
-        .sort((a, b) => a.label.localeCompare(b.label))
+        .sort((a, b) => a.order - b.order)
         .map((waypoint: RouteWaypoint) => (
           <div key={waypoint.waypointId} style={itemStyle}>
-            <span>{waypoint.label}</span>
+            <span>{alphabethAt(waypoint.order - 1)}</span>
             <button onClick={() => removeWaypoint(waypoint.waypointId)}>Delete</button>
           </div>
         ))}

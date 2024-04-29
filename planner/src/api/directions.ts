@@ -7,7 +7,7 @@ export const requestDirections = async (waypoints: RouteWaypoint[]): Promise<May
     return;
   }
 
-  waypoints.sort((a, b) => a.label.localeCompare(b.label));
+  waypoints.sort((a, b) => a.order - b.order);
 
   const { latitude: originLat, longitude: originLng }: Coordinate = waypoints[0].coordinate;
   const { latitude: destLat, longitude: destLng }: Coordinate = waypoints[waypoints.length - 1].coordinate;

@@ -8,7 +8,7 @@ export type Coordinate = {
 export type RouteWaypoint = {
   waypointId: string;
   coordinate: Coordinate;
-  label: string;
+  order: number;
   address?: string;
 };
 

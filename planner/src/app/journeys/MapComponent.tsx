@@ -53,7 +53,7 @@ const MapComponent: React.FC = () => {
     addWaypoint({
       waypointId: uuidv4(),
       coordinate,
-      label: alphabethAt(journey.waypoints.length)
+      order: journey.waypoints.length + 1
     });
   };
 
@@ -82,7 +82,7 @@ const MapComponent: React.FC = () => {
           <Marker
             key={index}
             position={{ lat: waypoint.coordinate.latitude, lng: waypoint.coordinate.longitude }}
-            label={waypoint.label}
+            label={alphabethAt(waypoint.order - 1)}
           />
         ))}
         {directions && <DirectionsRenderer directions={directions} options={{ suppressMarkers: true }} />}

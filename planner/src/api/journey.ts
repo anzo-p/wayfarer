@@ -13,7 +13,7 @@ export async function getJourney(journeyId: string): Promise<MaybeJourney> {
             latitude
             longitude
           }
-          label
+          order
           address
         }
       }
