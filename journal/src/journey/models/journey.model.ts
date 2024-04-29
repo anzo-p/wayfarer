@@ -9,22 +9,10 @@ export class Coordinate {
   longitude: number;
 }
 
-@ObjectType()
-export class UserMarker {
-  @Field(() => ID)
-  markerId: string;
-
-  @Field()
-  coordinate: Coordinate;
-}
-
 @ObjectType({ description: 'Journey waypoints' })
 export class RouteWaypoint {
   @Field(() => ID)
   waypointId: string;
-
-  @Field()
-  userMarkerId?: string;
 
   @Field()
   coordinate: Coordinate;
@@ -47,15 +35,6 @@ export class Journey {
   @Field({ nullable: true })
   title?: string;
 
-  @Field(() => [UserMarker])
-  markers: UserMarker[];
-
   @Field(() => [RouteWaypoint])
   waypoints: RouteWaypoint[];
-
-  @Field()
-  startWaypointId: string;
-
-  @Field()
-  endWaypointId: string;
 }

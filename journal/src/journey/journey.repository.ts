@@ -3,9 +3,9 @@ import { ConflictException, Injectable, NotFoundException } from '@nestjs/common
 import { GetItemCommand, PutItemCommand, QueryCommand } from '@aws-sdk/client-dynamodb';
 
 import { DynamoDBService } from '../dynamodb/dynamodb.service';
-import { Journey, RouteWaypoint, UserMarker } from './models/journey.model';
-import { journeyFromDb, markersFromDb, waypointsFromDb } from './models/journey.from-db-item';
-import { journeyToDb, markersToDb, waypointsToDb } from './models/journey.to-db-item';
+import { Journey, RouteWaypoint } from './models/journey.model';
+import { journeyFromDb, waypointsFromDb } from './models/journey.from-db-item';
+import { journeyToDb, waypointsToDb } from './models/journey.to-db-item';
 import { validateJourney } from './validator/journey.validator';
 import { BadDbDataException } from 'journey/errors/errors.custom-errors';
 
@@ -20,7 +20,7 @@ export class JourneysRepository {
     this.journeyTable = this.configService.get<string>('JOURNEY_TABLE');
   }
 
-  private async getJourneyItem(journeyId: string, waypoints: RouteWaypoint[], markers: UserMarker[]): Promise<Journey> {
+  private async getJourneyItem(journeyId: string, waypoints: RouteWaypoint[]): Promise<Journey> {
     const { Item } = await this.dynamoDBService.getItem(
       new GetItemCommand({
         TableName: this.journeyTable,
@@ -35,7 +35,7 @@ export class JourneysRepository {
       throw new NotFoundException('journey not found');
     }
 
-    return journeyFromDb(Item, waypoints, markers);
+    return journeyFromDb(Item, waypoints);
   }
 
   async saveJourney(journey: Journey): Promise<string> {
@@ -56,19 +56,14 @@ export class JourneysRepository {
 
     const journeyId = journey.journeyId;
     const waypoints = waypointsToDb(journeyId, journey.waypoints);
-    const markers = markersToDb(journeyId, journey.markers);
 
-    await this.dynamoDBService.bulkInsert(this.journeyTable, waypoints.concat(markers));
+    await this.dynamoDBService.bulkInsert(this.journeyTable, waypoints);
 
     return journeyId;
   }
 
   async saveWaypoints(journeyId: string, waypoints: RouteWaypoint[]): Promise<void> {
     return this.dynamoDBService.bulkInsert(this.journeyTable, waypointsToDb(journeyId, waypoints));
-  }
-
-  async saveMarkers(journeyId: string, markers: UserMarker[]): Promise<void> {
-    return this.dynamoDBService.bulkInsert(this.journeyTable, markersToDb(journeyId, markers));
   }
 
   async fetchJourney(journeyId: string): Promise<Journey> {
@@ -83,7 +78,6 @@ export class JourneysRepository {
     );
 
     const waypoints: RouteWaypoint[] = [];
-    const markers: UserMarker[] = [];
 
     relatedItems.Items?.forEach((item) => {
       const itemType = item.SK.S?.split('#')[0];
@@ -91,15 +85,13 @@ export class JourneysRepository {
         case 'WAYPOINT':
           waypoints.push(waypointsFromDb(item));
           break;
-        case 'USER_MARKER':
-          markers.push(markersFromDb(item));
-          break;
+
         default:
           break;
       }
     });
 
-    const journey = await this.getJourneyItem(journeyId, waypoints, markers);
+    const journey = await this.getJourneyItem(journeyId, waypoints);
 
     const { error, value } = validateJourney(journey);
     if (error) {

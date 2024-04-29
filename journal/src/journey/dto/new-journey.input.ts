@@ -10,21 +10,9 @@ export class InputCoordinate {
 }
 
 @InputType()
-export class InputUserMarker {
-  @Field(() => ID)
-  markerId: string;
-
-  @Field()
-  coordinate: InputCoordinate;
-}
-
-@InputType()
 export class InputRouteWaypoint {
   @Field(() => ID)
   waypointId: string;
-
-  @Field()
-  userMarkerId?: string;
 
   @Field()
   coordinate: InputCoordinate;
@@ -47,15 +35,6 @@ export class NewJourneyInput {
   @Field({ nullable: true })
   title?: string;
 
-  @Field(() => [InputUserMarker])
-  markers: InputUserMarker[];
-
   @Field(() => [InputRouteWaypoint])
   waypoints: InputRouteWaypoint[];
-
-  @Field()
-  startWaypointId: string;
-
-  @Field()
-  endWaypointId: string;
 }

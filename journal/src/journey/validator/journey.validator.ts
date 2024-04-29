@@ -1,9 +1,5 @@
-import { Journey, RouteWaypoint, UserMarker } from 'journey/models/journey.model';
-import { ValidatedModel, createModel, journeySchema, markerSchema, waypointSchema } from './journey.schemas';
-
-export function validateMarker(input: any): ValidatedModel<UserMarker> {
-  return createModel(input, markerSchema);
-}
+import { Journey, RouteWaypoint } from 'journey/models/journey.model';
+import { ValidatedModel, createModel, journeySchema, waypointSchema } from './journey.schemas';
 
 export function validateWaypoint(input: any): ValidatedModel<RouteWaypoint> {
   return createModel(input, waypointSchema);
