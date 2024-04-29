@@ -1,10 +1,9 @@
 import { DirectionsRenderer, GoogleMap, Marker, useJsApiLoader } from '@react-google-maps/api';
-import React, { useEffect, useRef, useState } from 'react';
+import React, { useEffect, useRef } from 'react';
 import { v4 as uuidv4 } from 'uuid';
 
-import { MaybeDirections, requestDirections, getMapBounds } from '@/src/api/directions';
+import { getMapBounds } from '@/src/api/directions';
 import { tooClose } from '@/src/helpers/location';
-import { getStartAndFinish, refreshWaypoints } from '@/src/helpers/waypoints';
 import { Coordinate } from '@/src/types/journey';
 
 import { useJourney } from './JourneyContext';
@@ -28,8 +27,7 @@ const center = {
 const MapComponent: React.FC = () => {
   const { isLoaded } = useJsApiLoader({ id: 'google-map-loader', googleMapsApiKey });
   const mapRef = useRef<google.maps.Map>();
-  const { journey, setJourney, addMarker, optimizeWaypoints } = useJourney();
-  const [directions, setDirections] = useState<MaybeDirections>(undefined);
+  const { journey, setMapLoaded, addMarker, directions } = useJourney();
 
   const onLoad = React.useCallback(
     function callback(map: google.maps.Map) {
@@ -58,37 +56,10 @@ const MapComponent: React.FC = () => {
   };
 
   useEffect(() => {
-    if (!isLoaded) {
-      return;
+    if (isLoaded) {
+      setMapLoaded(true);
     }
-    const getDirections = async () => {
-      try {
-        const directions: MaybeDirections = await requestDirections(journey.markers, { optimizeWaypoints });
-        if (!directions) {
-          return;
-        }
-
-        setDirections(directions);
-        const waypoints = refreshWaypoints(directions, journey.markers, journey.waypoints);
-        const { start, finish } = getStartAndFinish(directions, waypoints);
-
-        setJourney((journey) => ({
-          ...journey,
-          waypoints: waypoints,
-          startWaypointId: journey.startWaypointId || start?.waypointId || '',
-          endWaypointId: journey.markers.length > 0 ? finish?.waypointId || '' : journey.endWaypointId || ''
-        }));
-      } catch (error) {
-        console.error('Error calculating route:', error);
-      }
-    };
-
-    if (journey.markers.length >= 2) {
-      getDirections();
-    } else {
-      setDirections(undefined);
-    }
-  }, [isLoaded, journey.waypoints, journey.markers, setJourney, optimizeWaypoints]);
+  }, [isLoaded, setMapLoaded]);
 
   useEffect(() => {
     const handleResize = () => {

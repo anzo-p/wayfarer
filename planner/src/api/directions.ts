@@ -25,6 +25,7 @@ export const requestDirections = async (
     };
   });
 
+  console.log('Call Google Maps Directions');
   return new google.maps.DirectionsService().route({
     origin: new google.maps.LatLng(originLat, originLng),
     destination: new google.maps.LatLng(destLat, destLng),

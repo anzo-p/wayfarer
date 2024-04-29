@@ -2,7 +2,7 @@ import { Journey, MaybeJourney } from '@/src/types/journey';
 
 export async function getJourney(journeyId: string): Promise<MaybeJourney> {
   const query = `
-    query GetJourney($journeyId: String!) {
+    query Journey($journeyId: String!) {
       journey(journeyId: $journeyId) {
         journeyId
         time

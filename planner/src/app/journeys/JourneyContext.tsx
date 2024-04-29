@@ -1,6 +1,7 @@
 'use client';
 import React, { createContext, useContext, useMemo, useState } from 'react';
 
+import { MaybeDirections } from '@/src/api/directions';
 import InfoBanner from '@/src/components/ui/InfoBanner';
 import ResponsiveMajorMinor from '@/src/components/ui/ResponsiveMajorMinor';
 import { OverlayToolbar } from '@/src/components/ui/Toolbar';
@@ -14,8 +15,12 @@ import WaypointList from './WaypointList';
 interface JourneyContextType {
   journey: Journey;
   setJourney: React.Dispatch<React.SetStateAction<Journey>>;
+  mapLoaded: boolean;
+  setMapLoaded: React.Dispatch<React.SetStateAction<boolean>>;
   addMarker: (marker: UserMarker) => void;
   removeWaypoint: (waypointId: string) => void;
+  directions: MaybeDirections;
+  setDirections: React.Dispatch<React.SetStateAction<MaybeDirections | undefined>>;
   optimizeWaypoints: boolean;
   toggleOptimize: React.Dispatch<React.SetStateAction<boolean>>;
 }
@@ -23,8 +28,12 @@ interface JourneyContextType {
 const JourneyContext = createContext<JourneyContextType>({
   journey: makeJourney(),
   setJourney: () => {},
+  mapLoaded: false,
+  setMapLoaded: () => {},
   addMarker: () => {},
   removeWaypoint: () => {},
+  directions: undefined,
+  setDirections: () => {},
   optimizeWaypoints: true,
   toggleOptimize: () => {}
 });
@@ -39,8 +48,10 @@ const JourneyProvider: React.FC<JourneyProviderProps> = ({ journey: loadedJourne
   const { journey, setJourney, addMarker, removeWaypoint, isModified, saveChanges } = useJourneyState(
     loadedJourney || makeJourney()
   );
-  const { bannerContent, isBannerVisible, showBanner, hideBanner } = useInfoBanner();
+  const [mapLoaded, setMapLoaded] = useState(false);
+  const [directions, setDirections] = useState<MaybeDirections>(undefined);
   const [optimizeWaypoints, toggleOptimize] = useState(true);
+  const { bannerContent, isBannerVisible, showBanner, hideBanner } = useInfoBanner();
   const clipboardContent = `${process.env.NEXT_PUBLIC_JOURNAL_SERVICE_URL}/journeys/${journey.journeyId}`;
 
   const onClearButtonClick = () => {
@@ -73,12 +84,27 @@ const JourneyProvider: React.FC<JourneyProviderProps> = ({ journey: loadedJourne
     () => ({
       journey,
       setJourney,
+      mapLoaded,
+      setMapLoaded,
       addMarker,
       removeWaypoint,
+      directions,
+      setDirections,
       optimizeWaypoints,
       toggleOptimize
     }),
-    [journey, setJourney, addMarker, removeWaypoint, optimizeWaypoints, toggleOptimize]
+    [
+      journey,
+      setJourney,
+      mapLoaded,
+      setMapLoaded,
+      addMarker,
+      removeWaypoint,
+      directions,
+      setDirections,
+      optimizeWaypoints,
+      toggleOptimize
+    ]
   );
 
   return (
