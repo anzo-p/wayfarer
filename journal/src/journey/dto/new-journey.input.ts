@@ -18,7 +18,7 @@ export class InputRouteWaypoint {
   coordinate: InputCoordinate;
 
   @Field()
-  label: string;
+  order: number;
 
   @Field({ nullable: true })
   address?: string;

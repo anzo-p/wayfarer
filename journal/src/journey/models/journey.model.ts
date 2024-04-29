@@ -18,7 +18,7 @@ export class RouteWaypoint {
   coordinate: Coordinate;
 
   @Field()
-  label: string;
+  order: number;
 
   @Field({ nullable: true })
   address?: string;

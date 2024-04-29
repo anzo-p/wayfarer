@@ -25,7 +25,7 @@ export const waypointsToDb = (journeyId: string, waypoints: RouteWaypoint[]): Pu
       id: { S: waypoint.waypointId },
       latitude: { N: waypoint.coordinate.latitude.toString() },
       longitude: { N: waypoint.coordinate.longitude.toString() },
-      label: { S: waypoint.label }
+      order: { N: waypoint.order.toString() }
     };
 
     if (waypoint.address) {

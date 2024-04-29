@@ -6,7 +6,6 @@ const idSchema = Joi.string().uuid().required();
 
 const maybeString = Joi.string().optional();
 
-//eslint-disable-next-line @typescript-eslint/no-unused-vars
 const positiveNumber = Joi.number().positive();
 
 const coordinateSchema = Joi.object({
@@ -17,7 +16,7 @@ const coordinateSchema = Joi.object({
 export const waypointSchema = Joi.object({
   waypointId: idSchema,
   coordinate: coordinateSchema.required(),
-  label: Joi.string().required().length(1),
+  order: positiveNumber.required(),
   address: maybeString
 });
 

@@ -1,0 +1,56 @@
+# ------------------------------------------------------
+# THIS FILE WAS AUTOMATICALLY GENERATED (DO NOT MODIFY)
+# ------------------------------------------------------
+
+type Coordinate {
+  latitude: Float!
+  longitude: Float!
+}
+
+"""
+A date-time string at UTC, such as 2019-12-03T09:54:33Z, compliant with the date-time format.
+"""
+scalar DateTime
+
+input InputCoordinate {
+  latitude: Float!
+  longitude: Float!
+}
+
+input InputRouteWaypoint {
+  address: String
+  coordinate: InputCoordinate!
+  order: Float!
+  waypointId: ID!
+}
+
+"""Journey"""
+type Journey {
+  journeyId: ID!
+  time: DateTime!
+  title: String
+  waypoints: [RouteWaypoint!]!
+}
+
+type Mutation {
+  createJourney(newJourney: NewJourneyInput!): String!
+}
+
+input NewJourneyInput {
+  journeyId: ID!
+  time: DateTime!
+  title: String
+  waypoints: [InputRouteWaypoint!]!
+}
+
+type Query {
+  journey(journeyId: String!): Journey!
+}
+
+"""Journey waypoints"""
+type RouteWaypoint {
+  address: String
+  coordinate: Coordinate!
+  order: Float!
+  waypointId: ID!
+}

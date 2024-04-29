@@ -23,7 +23,7 @@ export const waypointsFromDb = (rec: Record<string, AttributeValue>): RouteWaypo
       latitude: Number(rec.latitude.N!),
       longitude: Number(rec.longitude.N!)
     },
-    label: rec.label.S!,
+    order: Number(rec.order.N!),
     address: rec.address?.S ?? undefined
   };
 
