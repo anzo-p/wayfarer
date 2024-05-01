@@ -76,7 +76,13 @@ const MapComponent: React.FC = () => {
   }, [journey.waypoints]);
 
   return isLoaded ? (
-    <GoogleMap mapContainerStyle={containerStyle} center={center} zoom={6} onLoad={onLoad} onClick={onMapClick}>
+    <GoogleMap
+      mapContainerStyle={containerStyle}
+      center={center}
+      zoom={6}
+      onLoad={onLoad}
+      onClick={!journey.readonly ? onMapClick : undefined}
+    >
       <>
         {journey.waypoints.map((waypoint, index) => (
           <Marker

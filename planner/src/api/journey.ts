@@ -7,6 +7,7 @@ export async function getJourney(journeyId: string): Promise<MaybeJourney> {
         journeyId
         time
         title
+        readonly
         waypoints {
           waypointId
           coordinate {

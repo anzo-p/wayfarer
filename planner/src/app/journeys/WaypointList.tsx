@@ -61,6 +61,15 @@ const WaypointList: React.FC = () => {
   }, [mapLoaded]);
   // onRequestDirections is stable, will not be redefined
 
+  useEffect(() => {
+    if (journey.readonly) {
+      showBanner({
+        bannerType: BannerTypeEnum.INFO,
+        message: 'This journey is shared with you as a readonly copy.'
+      });
+    }
+  }, [journey.readonly, showBanner]);
+
   return (
     <div>
       {journey.waypoints
@@ -68,7 +77,9 @@ const WaypointList: React.FC = () => {
         .map((waypoint: RouteWaypoint) => (
           <div key={waypoint.waypointId} style={itemStyle}>
             <span>{alphabethAt(waypoint.order - 1)}</span>
-            <button onClick={() => removeWaypoint(waypoint.waypointId)}>Delete</button>
+            <button disabled={journey.readonly} onClick={() => removeWaypoint(waypoint.waypointId)}>
+              Delete
+            </button>
           </div>
         ))}
       <button

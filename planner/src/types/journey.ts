@@ -18,6 +18,7 @@ export type Journey = {
   title?: string;
   waypoints: RouteWaypoint[];
   notes?: string;
+  readonly: boolean;
 };
 
 export type MaybeJourney = Journey | undefined;
@@ -25,5 +26,6 @@ export type MaybeJourney = Journey | undefined;
 export const makeJourney = (): Journey => ({
   journeyId: uuidv4(),
   time: new Date(),
-  waypoints: []
+  waypoints: [],
+  readonly: false
 });
