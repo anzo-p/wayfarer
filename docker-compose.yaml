@@ -19,4 +19,4 @@ services:
     env_file:
       - './planner/.env'
     environment:
-      - NEXT_PUBLIC_JOURNAL_SERVICE_URL=http://journal:3001
+      - NEXT_PUBLIC_JOURNAL_SERVICE_URL=http://journal:3001/graphql

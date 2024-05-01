@@ -4,7 +4,7 @@ export interface OverlayToolbarProps {
   canBeCleared: boolean;
   onClearButtonClick: () => void;
   canBeSaved: boolean;
-  onSharedButtonClick: () => void;
+  onShareButtonClick: () => void;
   canBeShared: boolean;
   onSaveButtonClick: () => void;
 }
@@ -15,7 +15,7 @@ export const OverlayToolbar: React.FC<OverlayToolbarProps> = ({
   canBeSaved,
   onSaveButtonClick,
   canBeShared,
-  onSharedButtonClick
+  onShareButtonClick
 }) => {
   return (
     <div>
@@ -38,7 +38,7 @@ export const OverlayToolbar: React.FC<OverlayToolbarProps> = ({
       <button
         disabled={!canBeShared}
         onClick={() => {
-          onSharedButtonClick();
+          onShareButtonClick();
         }}
       >
         share

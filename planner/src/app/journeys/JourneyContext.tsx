@@ -41,14 +41,11 @@ export interface JourneyProviderProps {
 }
 
 const JourneyProvider: React.FC<JourneyProviderProps> = ({ journey: loadedJourney }) => {
-  const { journey, setJourney, addWaypoint, removeWaypoint, isModified, saveChanges } = useJourneyState(
-    loadedJourney || makeJourney()
-  );
+  const { journey, setJourney, addWaypoint, removeWaypoint, isModified, saveChanges, isShared, saveCopyToShare } =
+    useJourneyState(loadedJourney || makeJourney());
   const [mapLoaded, setMapLoaded] = useState(false);
   const [directions, setDirections] = useState<MaybeDirections>(undefined);
   const { bannerContent, isBannerVisible, showBanner, hideBanner } = useInfoBanner();
-
-  const clipboardContent = `http://127.0.0.1:3000/journeys/${journey.journeyId}`;
 
   const onClearButtonClick = () => {
     setJourney((journey) => ({
@@ -62,18 +59,16 @@ const JourneyProvider: React.FC<JourneyProviderProps> = ({ journey: loadedJourne
     showBanner({
       message: 'Continue later from this state using this link',
       bannerType: BannerTypeEnum.SUCCESS,
-      clipboardContent
+      clipboardContent: `${process.env.NEXT_PUBLIC_PLANNER_APP_URL}/${journey.journeyId}`
     });
   };
 
-  const onSharedButtonClick = () => {
-    if (isModified) {
-      saveChanges();
-    }
+  const onShareButtonClick = async () => {
+    const copyJourneyId = await saveCopyToShare();
     showBanner({
       message: 'Link to readonoly copy of your journey',
       bannerType: BannerTypeEnum.INFO,
-      clipboardContent
+      clipboardContent: `${process.env.NEXT_PUBLIC_PLANNER_APP_URL}/${copyJourneyId}`
     });
   };
 
@@ -100,8 +95,8 @@ const JourneyProvider: React.FC<JourneyProviderProps> = ({ journey: loadedJourne
             onClearButtonClick={onClearButtonClick}
             canBeSaved={isModified && journey.waypoints.length > 1}
             onSaveButtonClick={onSaveButtonClick}
-            canBeShared={journey.waypoints.length > 1}
-            onSharedButtonClick={onSharedButtonClick}
+            canBeShared={!journey.readonly && !isShared && journey.waypoints.length > 1}
+            onShareButtonClick={onShareButtonClick}
           />
         }
         major={<MapComponent />}

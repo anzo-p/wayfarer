@@ -29,3 +29,15 @@ export const makeJourney = (): Journey => ({
   waypoints: [],
   readonly: false
 });
+
+export const makeReadonlyCopy = (journey: Journey): Journey => {
+  const { time, title, waypoints, notes } = journey;
+  return {
+    journeyId: uuidv4(),
+    time,
+    title,
+    waypoints,
+    notes,
+    readonly: true
+  };
+};

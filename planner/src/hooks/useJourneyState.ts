@@ -1,11 +1,12 @@
 import { useCallback, useEffect, useState } from 'react';
 
 import { saveJourney } from '@/src/api/journey';
-import { Journey, RouteWaypoint, makeJourney } from '@/src/types/journey';
+import { Journey, RouteWaypoint, makeJourney, makeReadonlyCopy } from '@/src/types/journey';
 
 export const useJourneyState = (initialJourney: Journey) => {
   const [journey, setJourney] = useState(initialJourney || makeJourney());
   const [isModified, setModified] = useState(false);
+  const [isShared, setShared] = useState(false);
   const [lastSavedWaypoints, setLastSavedWaypoints] = useState<RouteWaypoint[]>(journey.waypoints || []);
 
   const addWaypoint = useCallback(
@@ -37,8 +38,18 @@ export const useJourneyState = (initialJourney: Journey) => {
     setLastSavedWaypoints(journey.waypoints);
   };
 
+  const saveCopyToShare = async () => {
+    const copy = makeReadonlyCopy(journey);
+    await saveJourney(copy);
+    setShared(true);
+    return copy.journeyId;
+  };
+
   useEffect(() => {
-    setModified(JSON.stringify(journey.waypoints) !== JSON.stringify(lastSavedWaypoints));
+    if (JSON.stringify(journey.waypoints) !== JSON.stringify(lastSavedWaypoints)) {
+      setModified(true);
+      setShared(false);
+    }
   }, [journey.waypoints, lastSavedWaypoints]);
 
   return {
@@ -47,6 +58,8 @@ export const useJourneyState = (initialJourney: Journey) => {
     addWaypoint,
     removeWaypoint,
     isModified,
-    saveChanges
+    saveChanges,
+    isShared,
+    saveCopyToShare
   };
 };
