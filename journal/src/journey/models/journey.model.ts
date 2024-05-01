@@ -35,6 +35,9 @@ export class Journey {
   @Field({ nullable: true })
   title?: string;
 
+  @Field()
+  readonly: boolean;
+
   @Field(() => [RouteWaypoint])
   waypoints: RouteWaypoint[];
 }

@@ -27,6 +27,7 @@ input InputRouteWaypoint {
 """Journey"""
 type Journey {
   journeyId: ID!
+  readonly: Boolean!
   time: DateTime!
   title: String
   waypoints: [RouteWaypoint!]!
@@ -38,6 +39,7 @@ type Mutation {
 
 input NewJourneyInput {
   journeyId: ID!
+  readonly: Boolean!
   time: DateTime!
   title: String
   waypoints: [InputRouteWaypoint!]!

@@ -35,6 +35,9 @@ export class NewJourneyInput {
   @Field({ nullable: true })
   title?: string;
 
+  @Field()
+  readonly: boolean;
+
   @Field(() => [InputRouteWaypoint])
   waypoints: InputRouteWaypoint[];
 }

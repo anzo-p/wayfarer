@@ -7,7 +7,8 @@ export const journeyToDb = (journey: Journey): PutItemCommandInput['Item'] => {
     PK: { S: `JOURNEY#${journey.journeyId}` },
     SK: { S: `JOURNEY#${journey.journeyId}` },
     id: { S: journey.journeyId },
-    time: { N: iso8601ToEpoch(journey.time).toString() }
+    time: { N: iso8601ToEpoch(journey.time).toString() },
+    readonly: { BOOL: journey.readonly }
   };
 
   if (journey.title) {

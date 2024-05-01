@@ -6,7 +6,8 @@ export const journeyFromDb = (rec: Record<string, AttributeValue>, waypoints: Ro
   const item: Journey = {
     journeyId: rec.id.S!,
     time: epochToIso8601(Number(rec.time.N!)),
-    waypoints
+    waypoints,
+    readonly: rec.readonly.BOOL!
   };
 
   if (rec.title) {

@@ -24,7 +24,8 @@ export const journeySchema = Joi.object({
   journeyId: idSchema,
   time: Joi.date().iso(),
   title: maybeString,
-  waypoints: Joi.array().items(waypointSchema).required()
+  waypoints: Joi.array().items(waypointSchema).required(),
+  readonly: Joi.boolean().required()
 });
 
 export function createModel<T>(input: any, schema: Joi.ObjectSchema<T>): ValidatedModel<T> {
