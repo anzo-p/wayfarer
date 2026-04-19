@@ -28,18 +28,17 @@ const center = {
 const MapComponent: React.FC = () => {
   const { isLoaded } = useJsApiLoader({ id: 'google-map-loader', googleMapsApiKey });
   const mapRef = useRef<google.maps.Map>();
-  const { journey, setMapLoaded, addWaypoint, directions } = useJourney();
+  const { journey, sortedWaypoints, setMapLoaded, addWaypoint, directions } = useJourney();
 
   const onLoad = React.useCallback(
     function callback(map: google.maps.Map) {
       mapRef.current = map;
-      const waypoints = journey.waypoints;
-      if (waypoints.length) {
-        const bounds = getMapBounds(waypoints);
+      if (sortedWaypoints.length) {
+        const bounds = getMapBounds(sortedWaypoints);
         map.fitBounds(bounds);
       }
     },
-    [journey.waypoints]
+    [sortedWaypoints]
   );
 
   const onMapClick = (event: google.maps.MapMouseEvent) => {
@@ -66,14 +65,14 @@ const MapComponent: React.FC = () => {
   useEffect(() => {
     const handleResize = () => {
       if (mapRef.current && journey.waypoints.length) {
-        const bounds = getMapBounds(journey.waypoints);
+        const bounds = getMapBounds(sortedWaypoints);
         mapRef.current.fitBounds(bounds);
       }
     };
     window.addEventListener('resize', handleResize);
 
     return () => window.removeEventListener('resize', handleResize);
-  }, [journey.waypoints]);
+  }, [journey.waypoints.length, sortedWaypoints]);
 
   return isLoaded ? (
     <GoogleMap
@@ -84,9 +83,9 @@ const MapComponent: React.FC = () => {
       onClick={!journey.readonly ? onMapClick : undefined}
     >
       <>
-        {journey.waypoints.map((waypoint, index) => (
+        {sortedWaypoints.map((waypoint) => (
           <Marker
-            key={index}
+            key={waypoint.waypointId}
             position={{ lat: waypoint.coordinate.latitude, lng: waypoint.coordinate.longitude }}
             label={alphabethAt(waypoint.order - 1)}
           />

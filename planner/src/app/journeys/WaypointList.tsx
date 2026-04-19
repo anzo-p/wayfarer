@@ -1,4 +1,4 @@
-import React, { useEffect, useState } from 'react';
+import React, { useEffect } from 'react';
 
 import { MaybeDirections, requestDirections } from '@/src/api/directions';
 import { BannerTypeEnum } from '@/src/components/ui/InfoBanner';
@@ -17,20 +17,29 @@ const itemStyle: React.CSSProperties = {
 };
 
 const WaypointList: React.FC = () => {
-  const { journey, mapLoaded, removeWaypoint, directions, setDirections, showBanner } = useJourney();
-  const [lastDirections, setLastDirections] = useState<MaybeDirections>(undefined);
+  const {
+    journey,
+    sortedWaypoints,
+    mapLoaded,
+    removeWaypoint,
+    hasFreshDirections,
+    setDirections,
+    markDirectionsCurrent,
+    showBanner
+  } = useJourney();
 
   const onRequestDirections = async () => {
     if (!mapLoaded) {
       return;
     }
-    if (journey.waypoints.length < 2) {
+    if (sortedWaypoints.length < 2) {
       setDirections(undefined);
       return;
     }
 
     try {
-      const newDirections: MaybeDirections = await requestDirections(journey.waypoints);
+      console.log('Requesting directions for waypoints:', sortedWaypoints);
+      const newDirections: MaybeDirections = await requestDirections(sortedWaypoints);
       if (!newDirections) {
         console.log('Google maps api responded no directions');
         return;
@@ -45,8 +54,8 @@ const WaypointList: React.FC = () => {
       }
 
       setDirections(newDirections);
-      setLastDirections(newDirections);
-      updateAddresses(newDirections.routes[0]?.legs, journey.waypoints);
+      markDirectionsCurrent();
+      updateAddresses(newDirections.routes[0]?.legs, sortedWaypoints);
     } catch (error) {
       console.error('Error calculating route:', error);
     }
@@ -72,20 +81,15 @@ const WaypointList: React.FC = () => {
 
   return (
     <div>
-      {journey.waypoints
-        .sort((a, b) => a.order - b.order)
-        .map((waypoint: RouteWaypoint) => (
-          <div key={waypoint.waypointId} style={itemStyle}>
-            <span>{alphabethAt(waypoint.order - 1)}</span>
-            <button disabled={journey.readonly} onClick={() => removeWaypoint(waypoint.waypointId)}>
-              Delete
-            </button>
-          </div>
-        ))}
-      <button
-        disabled={(directions && directions === lastDirections) || journey.waypoints.length < 2}
-        onClick={() => onRequestDirections()}
-      >
+      {sortedWaypoints.map((waypoint: RouteWaypoint) => (
+        <div key={waypoint.waypointId} style={itemStyle}>
+          <span>{alphabethAt(waypoint.order - 1)}</span>
+          <button disabled={journey.readonly} onClick={() => removeWaypoint(waypoint.waypointId)}>
+            Delete
+          </button>
+        </div>
+      ))}
+      <button disabled={hasFreshDirections || sortedWaypoints.length < 2} onClick={() => onRequestDirections()}>
         Get directions
       </button>
     </div>

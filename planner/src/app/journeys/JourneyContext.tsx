@@ -11,26 +11,34 @@ import { Journey, RouteWaypoint, makeJourney } from '@/src/types/journey';
 
 import MapComponent from './MapComponent';
 import WaypointList from './WaypointList';
+import { sort } from '@/src/helpers/waypoints';
 
 interface JourneyContextType {
   journey: Journey;
-  mapLoaded: boolean;
-  setMapLoaded: React.Dispatch<React.SetStateAction<boolean>>;
   addWaypoint: (waypoint: RouteWaypoint) => void;
   removeWaypoint: (waypointId: string) => void;
+  sortedWaypoints: RouteWaypoint[];
   directions: MaybeDirections;
   setDirections: React.Dispatch<React.SetStateAction<MaybeDirections | undefined>>;
+  hasFreshDirections: boolean;
+  markDirectionsCurrent: () => void;
+  mapLoaded: boolean;
+  setMapLoaded: React.Dispatch<React.SetStateAction<boolean>>;
+
   showBanner: (content: { bannerType: BannerTypeEnum; message: string; clipboardContent?: string }) => void;
 }
 
 const JourneyContext = createContext<JourneyContextType>({
   journey: makeJourney(),
-  mapLoaded: false,
-  setMapLoaded: () => {},
   addWaypoint: () => {},
   removeWaypoint: () => {},
+  sortedWaypoints: [],
   directions: undefined,
   setDirections: () => {},
+  hasFreshDirections: false,
+  markDirectionsCurrent: () => {},
+  mapLoaded: false,
+  setMapLoaded: () => {},
   showBanner: () => {}
 });
 
@@ -45,7 +53,20 @@ const JourneyProvider: React.FC<JourneyProviderProps> = ({ journey: loadedJourne
     useJourneyState(loadedJourney || makeJourney());
   const [mapLoaded, setMapLoaded] = useState(false);
   const [directions, setDirections] = useState<MaybeDirections>(undefined);
+  const [directionsWaypointSignature, setDirectionsWaypointSignature] = useState<string | undefined>(undefined);
   const { bannerContent, isBannerVisible, showBanner, hideBanner } = useInfoBanner();
+  const sortedWaypoints = useMemo(() => sort(journey.waypoints), [journey.waypoints]);
+  const waypointSignature = useMemo(
+    () =>
+      sortedWaypoints
+        .map(
+          (waypoint) =>
+            `${waypoint.waypointId}:${waypoint.order}:${waypoint.coordinate.latitude}:${waypoint.coordinate.longitude}`
+        )
+        .join('|'),
+    [sortedWaypoints]
+  );
+  const hasFreshDirections = Boolean(directions) && directionsWaypointSignature === waypointSignature;
 
   const onClearButtonClick = () => {
     setJourney((journey) => ({
@@ -54,12 +75,14 @@ const JourneyProvider: React.FC<JourneyProviderProps> = ({ journey: loadedJourne
     }));
   };
 
-  const onSaveButtonClick = () => {
-    saveChanges();
+  const baseUrl = `${process.env.NEXT_PUBLIC_PLANNER_APP_URL}/journeys`;
+
+  const onSaveButtonClick = async () => {
+    await saveChanges();
     showBanner({
       message: 'Continue later from this state using this link',
       bannerType: BannerTypeEnum.SUCCESS,
-      clipboardContent: `${process.env.NEXT_PUBLIC_PLANNER_APP_URL}/${journey.journeyId}`
+      clipboardContent: `${baseUrl}/${journey.journeyId}`
     });
   };
 
@@ -68,22 +91,41 @@ const JourneyProvider: React.FC<JourneyProviderProps> = ({ journey: loadedJourne
     showBanner({
       message: 'Link to readonoly copy of your journey',
       bannerType: BannerTypeEnum.INFO,
-      clipboardContent: `${process.env.NEXT_PUBLIC_PLANNER_APP_URL}/${copyJourneyId}`
+      clipboardContent: `${baseUrl}/${copyJourneyId}`
     });
+  };
+
+  const markDirectionsCurrent = () => {
+    setDirectionsWaypointSignature(waypointSignature);
   };
 
   const memoizedContext = useMemo(
     () => ({
       journey,
-      mapLoaded,
-      setMapLoaded,
       addWaypoint,
       removeWaypoint,
+      sortedWaypoints,
       directions,
       setDirections,
+      hasFreshDirections,
+      markDirectionsCurrent,
+      mapLoaded,
+      setMapLoaded,
       showBanner
     }),
-    [journey, mapLoaded, setMapLoaded, addWaypoint, removeWaypoint, directions, setDirections, showBanner]
+    [
+      journey,
+      addWaypoint,
+      removeWaypoint,
+      sortedWaypoints,
+      directions,
+      setDirections,
+      hasFreshDirections,
+      markDirectionsCurrent,
+      mapLoaded,
+      setMapLoaded,
+      showBanner
+    ]
   );
 
   return (

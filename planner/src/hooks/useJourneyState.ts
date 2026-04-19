@@ -1,6 +1,7 @@
 import { useCallback, useEffect, useState } from 'react';
 
 import { saveJourney } from '@/src/api/journey';
+import { reindex } from '@/src/helpers/waypoints';
 import { Journey, RouteWaypoint, makeJourney, makeReadonlyCopy } from '@/src/types/journey';
 
 export const useJourneyState = (initialJourney: Journey) => {
@@ -21,15 +22,12 @@ export const useJourneyState = (initialJourney: Journey) => {
 
   const removeWaypoint = useCallback(
     (waypointId: string) => {
-      const removable = journey.waypoints.find((waypoint) => waypoint.waypointId === waypointId);
-      if (removable) {
-        setJourney((journey) => ({
-          ...journey,
-          waypoints: journey.waypoints.filter((waypoint) => waypoint.waypointId !== waypointId)
-        }));
-      }
+      setJourney((journey) => ({
+        ...journey,
+        waypoints: reindex(journey.waypoints.filter((waypoint) => waypoint.waypointId !== waypointId))
+      }));
     },
-    [setJourney, journey.waypoints]
+    [setJourney]
   );
 
   const saveChanges = async () => {
