@@ -1,6 +1,6 @@
 import { calculateTotalDistance } from '@/src/helpers/directions';
 import { Coordinate, RouteWaypoint } from '@/src/types/journey';
-import { sort } from '@/src/helpers/waypoints';
+import { canMakeRoute, sort } from '@/src/helpers/waypoints';
 export type MaybeDirections = google.maps.DirectionsResult | undefined;
 
 type RouteCriterion = 'distance' | 'duration';
@@ -8,7 +8,7 @@ type RouteCriterion = 'distance' | 'duration';
 const lengthSensationThreshold = Number(process.env.NEXT_PUBLIC_ROUTE_LENGTH_SENSATION_THRESHOLD);
 
 export const requestDirections = async (waypoints: RouteWaypoint[]): Promise<MaybeDirections> => {
-  if (waypoints.length < 2) {
+  if (!canMakeRoute(waypoints)) {
     return;
   }
 

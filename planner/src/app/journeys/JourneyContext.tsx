@@ -11,7 +11,7 @@ import { Journey, RouteWaypoint, makeJourney } from '@/src/types/journey';
 
 import MapComponent from './MapComponent';
 import WaypointList from './WaypointList';
-import { sort } from '@/src/helpers/waypoints';
+import { canBeCleared, canMakeRoute, sort } from '@/src/helpers/waypoints';
 
 interface JourneyContextType {
   journey: Journey;
@@ -133,11 +133,11 @@ const JourneyProvider: React.FC<JourneyProviderProps> = ({ journey: loadedJourne
       <ResponsiveMajorMinor
         toolbar={
           <OverlayToolbar
-            canBeCleared={journey.waypoints.length > 0}
+            canBeCleared={canBeCleared(journey.waypoints)}
             onClearButtonClick={onClearButtonClick}
-            canBeSaved={isModified && journey.waypoints.length > 1}
+            canBeSaved={isModified && canMakeRoute(journey.waypoints)}
             onSaveButtonClick={onSaveButtonClick}
-            canBeShared={!journey.readonly && !isShared && journey.waypoints.length > 1}
+            canBeShared={!journey.readonly && !isShared && canMakeRoute(journey.waypoints)}
             onShareButtonClick={onShareButtonClick}
           />
         }

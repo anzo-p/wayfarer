@@ -4,7 +4,7 @@ import { MaybeDirections, requestDirections } from '@/src/api/directions';
 import { BannerTypeEnum } from '@/src/components/ui/InfoBanner';
 import { detectDetour } from '@/src/helpers/directions';
 import { alphabethAt } from '@/src/helpers/string';
-import { updateAddresses } from '@/src/helpers/waypoints';
+import { canMakeRoute, updateAddresses } from '@/src/helpers/waypoints';
 import { RouteWaypoint } from '@/src/types/journey';
 
 import { useJourney } from './JourneyContext';
@@ -32,7 +32,7 @@ const WaypointList: React.FC = () => {
     if (!mapLoaded) {
       return;
     }
-    if (sortedWaypoints.length < 2) {
+    if (!canMakeRoute(sortedWaypoints)) {
       setDirections(undefined);
       return;
     }
@@ -89,7 +89,7 @@ const WaypointList: React.FC = () => {
           </button>
         </div>
       ))}
-      <button disabled={hasFreshDirections || sortedWaypoints.length < 2} onClick={() => onRequestDirections()}>
+      <button disabled={hasFreshDirections || !canMakeRoute(sortedWaypoints)} onClick={() => onRequestDirections()}>
         Get directions
       </button>
     </div>

@@ -4,6 +4,10 @@ import { euclideanDistance } from './location';
 
 const proximityThreshold = 0.0001;
 
+export const canBeCleared = (waypoints: RouteWaypoint[]): boolean => waypoints.length > 0;
+
+export const canMakeRoute = (waypoints: RouteWaypoint[]): boolean => waypoints.length > 1;
+
 export const reindex = (waypoints: RouteWaypoint[]): RouteWaypoint[] =>
   [...waypoints].map((waypoint, index) => ({
     ...waypoint,
