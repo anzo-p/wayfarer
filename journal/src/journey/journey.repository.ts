@@ -7,7 +7,7 @@ import { Journey, RouteWaypoint } from './models/journey.model';
 import { journeyFromDb, waypointsFromDb } from './models/journey.from-db-item';
 import { journeyToDb, waypointsToDb } from './models/journey.to-db-item';
 import { validateJourney } from './validator/journey.validator';
-import { BadDbDataException } from 'journey/errors/errors.custom-errors';
+import { BadDbDataException } from './errors/errors.custom-errors';
 
 @Injectable()
 export class JourneysRepository {

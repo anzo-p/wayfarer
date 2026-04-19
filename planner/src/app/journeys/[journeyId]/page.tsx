@@ -3,8 +3,9 @@ import { MaybeJourney } from '@/src/types/journey';
 
 import JourneyProvider from '../JourneyContext';
 
-async function JourneyPage({ params }: { params: { journeyId: string } }) {
-  const journey: MaybeJourney = await getJourney(params.journeyId);
+async function JourneyPage({ params }: { params: Promise<{ journeyId: string }> }) {
+  const { journeyId } = await params;
+  const journey: MaybeJourney = await getJourney(journeyId);
   return <JourneyProvider journey={journey}></JourneyProvider>;
 }
 

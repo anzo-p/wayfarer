@@ -1,6 +1,6 @@
 import { calculateTotalDistance } from '@/src/helpers/directions';
 import { Coordinate, RouteWaypoint } from '@/src/types/journey';
-
+import { sort } from '@/src/helpers/waypoints';
 export type MaybeDirections = google.maps.DirectionsResult | undefined;
 
 type RouteCriterion = 'distance' | 'duration';
@@ -12,18 +12,20 @@ export const requestDirections = async (waypoints: RouteWaypoint[]): Promise<May
     return;
   }
 
-  waypoints.sort((a, b) => a.order - b.order);
+  const sortedWaypoints = sort(waypoints);
 
-  const { latitude: originLat, longitude: originLng }: Coordinate = waypoints[0].coordinate;
-  const { latitude: destLat, longitude: destLng }: Coordinate = waypoints[waypoints.length - 1].coordinate;
+  const { latitude: originLat, longitude: originLng }: Coordinate = sortedWaypoints[0].coordinate;
+  const { latitude: destLat, longitude: destLng }: Coordinate = sortedWaypoints[sortedWaypoints.length - 1].coordinate;
 
-  const middleMarkers: google.maps.DirectionsWaypoint[] = waypoints.slice(1, waypoints.length - 1).map((waypoint) => {
-    const { latitude, longitude } = waypoint.coordinate;
-    return {
-      location: new google.maps.LatLng(latitude, longitude),
-      stopover: true
-    };
-  });
+  const middleMarkers: google.maps.DirectionsWaypoint[] = sortedWaypoints
+    .slice(1, sortedWaypoints.length - 1)
+    .map((waypoint) => {
+      const { latitude, longitude } = waypoint.coordinate;
+      return {
+        location: new google.maps.LatLng(latitude, longitude),
+        stopover: true
+      };
+    });
 
   console.log('Call Google Maps Directions');
   const directions = await new google.maps.DirectionsService().route({

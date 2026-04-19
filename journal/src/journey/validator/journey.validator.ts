@@ -1,4 +1,4 @@
-import { Journey, RouteWaypoint } from 'journey/models/journey.model';
+import { Journey, RouteWaypoint } from '../models/journey.model';
 import { ValidatedModel, createModel, journeySchema, waypointSchema } from './journey.schemas';
 
 export function validateWaypoint(input: any): ValidatedModel<RouteWaypoint> {

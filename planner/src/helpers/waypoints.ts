@@ -1,15 +1,23 @@
 import { Coordinate, RouteWaypoint } from '@/src/types/journey';
 
-import { euclidianDistance } from './location';
+import { euclideanDistance } from './location';
 
 const proximityThreshold = 0.0001;
+
+export const reindex = (waypoints: RouteWaypoint[]): RouteWaypoint[] =>
+  [...waypoints].map((waypoint, index) => ({
+    ...waypoint,
+    order: index + 1
+  }));
+
+export const sort = (waypoints: RouteWaypoint[]): RouteWaypoint[] => [...waypoints].sort((a, b) => a.order - b.order);
 
 export const tooClose = (
   coordinate: Coordinate,
   waypoints: RouteWaypoint[],
   threshold: number = proximityThreshold
 ) => {
-  return waypoints.some((waypoint) => euclidianDistance(coordinate, waypoint.coordinate) < threshold);
+  return waypoints.some((waypoint) => euclideanDistance(coordinate, waypoint.coordinate) < threshold);
 };
 
 export const updateAddresses = (legs: google.maps.DirectionsLeg[], waypoints: RouteWaypoint[]): void => {
@@ -29,7 +37,7 @@ const findNearest = (waypoints: RouteWaypoint[], coordinate: Coordinate): RouteW
   let minDistance = Infinity;
 
   waypoints.forEach((waypoint) => {
-    const distance = euclidianDistance(coordinate, waypoint.coordinate);
+    const distance = euclideanDistance(coordinate, waypoint.coordinate);
     if (distance < minDistance) {
       minDistance = distance;
       nearest = waypoint;

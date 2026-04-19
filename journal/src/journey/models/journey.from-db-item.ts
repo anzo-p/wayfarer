@@ -1,5 +1,5 @@
 import { AttributeValue } from '@aws-sdk/client-dynamodb';
-import { epochToIso8601 } from 'helpers/date';
+import { epochToIso8601 } from '../../helpers/date';
 import { Journey, RouteWaypoint } from './journey.model';
 
 export const journeyFromDb = (rec: Record<string, AttributeValue>, waypoints: RouteWaypoint[]): Journey => {
@@ -18,7 +18,7 @@ export const journeyFromDb = (rec: Record<string, AttributeValue>, waypoints: Ro
 };
 
 export const waypointsFromDb = (rec: Record<string, AttributeValue>): RouteWaypoint => {
-  const item: RouteWaypoint = {
+  return {
     waypointId: rec.id.S!,
     coordinate: {
       latitude: Number(rec.latitude.N!),
@@ -27,6 +27,4 @@ export const waypointsFromDb = (rec: Record<string, AttributeValue>): RouteWaypo
     order: Number(rec.order.N!),
     address: rec.address?.S ?? undefined
   };
-
-  return item;
 };
