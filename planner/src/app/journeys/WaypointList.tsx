@@ -1,6 +1,6 @@
 import React, { useEffect } from 'react';
 
-import { MaybeDirections, requestDirections } from '@/src/api/directions';
+import { MaybeDirections, requestDirections } from '@/src/api/google/directions';
 import { BannerTypeEnum } from '@/src/components/ui/InfoBanner';
 import { detectDetour } from '@/src/helpers/directions';
 import { alphabethAt } from '@/src/helpers/string';

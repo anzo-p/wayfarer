@@ -1,7 +1,7 @@
 'use client';
 import React, { createContext, useContext, useMemo, useState } from 'react';
 
-import { MaybeDirections } from '@/src/api/directions';
+import { MaybeDirections } from '@/src/api/google/directions';
 import InfoBanner, { BannerTypeEnum } from '@/src/components/ui/InfoBanner';
 import ResponsiveMajorMinor from '@/src/components/ui/ResponsiveMajorMinor';
 import { OverlayToolbar } from '@/src/components/ui/Toolbar';

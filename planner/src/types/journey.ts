@@ -1,19 +1,23 @@
 import { v4 as uuidv4 } from 'uuid';
 
+export type JourneyId = string;
+
+export type WaypointId = string;
+
 export type Coordinate = {
   latitude: number;
   longitude: number;
 };
 
 export type RouteWaypoint = {
-  waypointId: string;
+  waypointId: WaypointId;
   coordinate: Coordinate;
   order: number;
   address?: string;
 };
 
 export type Journey = {
-  journeyId: string;
+  journeyId: JourneyId;
   time: Date;
   title?: string;
   waypoints: RouteWaypoint[];
@@ -34,9 +38,12 @@ export const makeReadonlyCopy = (journey: Journey): Journey => {
   const { time, title, waypoints, notes } = journey;
   return {
     journeyId: uuidv4(),
-    time,
+    time: new Date(time),
     title,
-    waypoints,
+    waypoints: waypoints.map((waypoint) => ({
+      ...waypoint,
+      coordinate: { ...waypoint.coordinate }
+    })),
     notes,
     readonly: true
   };

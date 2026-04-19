@@ -1,6 +1,6 @@
 import { useCallback, useEffect, useState } from 'react';
 
-import { saveJourney } from '@/src/api/journey';
+import { saveJourney } from '@/src/api/journal/journey';
 import { reindex } from '@/src/helpers/waypoints';
 import { Journey, RouteWaypoint, makeJourney, makeReadonlyCopy } from '@/src/types/journey';
 

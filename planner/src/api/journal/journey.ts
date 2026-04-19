@@ -1,5 +1,17 @@
 import { Journey, MaybeJourney } from '@/src/types/journey';
 
+import { JourneyDto } from './journey.dto';
+import { toJourney, toSaveJourneyInputDto } from './journey.mapper';
+
+type JourneyQueryResult = {
+  data?: {
+    journey?: JourneyDto | null;
+  };
+  errors?: Array<{
+    message: string;
+  }>;
+};
+
 export async function getJourney(journeyId: string): Promise<MaybeJourney> {
   const query = `
     query Journey($journeyId: String!) {
@@ -34,13 +46,15 @@ export async function getJourney(journeyId: string): Promise<MaybeJourney> {
     throw new Error('Network response was not ok');
   }
 
-  const result = await response.json();
-  if (result.data.journey) {
-    return result.data.journey;
+  const result: JourneyQueryResult = await response.json();
+  if (result.data?.journey) {
+    return toJourney(result.data.journey);
   }
 }
 
-export async function saveJourney(newJourney: Journey): Promise<void> {
+export async function saveJourney(journey: Journey): Promise<void> {
+  const newJourney = toSaveJourneyInputDto(journey);
+
   const query = `
     mutation CreateJourney($newJourney: NewJourneyInput!) {
       createJourney(newJourney: $newJourney)
@@ -61,8 +75,13 @@ export async function saveJourney(newJourney: Journey): Promise<void> {
     })
   });
 
+  const result: JourneyQueryResult = await response.json();
+
   if (!response.ok) {
-    console.error(response);
-    throw new Error('Network response was not ok');
+    throw new Error(result.errors?.map((error) => error.message).join('; ') || 'Network response was not ok');
+  }
+
+  if (result.errors?.length) {
+    throw new Error(result.errors.map((error) => error.message).join('; '));
   }
 }
