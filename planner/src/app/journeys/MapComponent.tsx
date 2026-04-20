@@ -27,17 +27,17 @@ const center = {
 const MapComponent: React.FC = () => {
   const { isLoaded } = useJsApiLoader({ id: 'google-map-loader', googleMapsApiKey });
   const mapRef = useRef<google.maps.Map>();
-  const { journey, sortedWaypoints, setMapLoaded, addWaypoint, directions } = useJourney();
+  const { journey, addWaypoint, directions, directionsRenderKey } = useJourney();
 
   const onLoad = React.useCallback(
     function callback(map: google.maps.Map) {
       mapRef.current = map;
-      if (sortedWaypoints.length) {
-        const bounds = getMapBounds(sortedWaypoints);
+      if (journey.waypoints.length) {
+        const bounds = getMapBounds(journey.waypoints);
         map.fitBounds(bounds);
       }
     },
-    [sortedWaypoints]
+    [journey.waypoints]
   );
 
   const onMapClick = (event: google.maps.MapMouseEvent) => {
@@ -52,22 +52,16 @@ const MapComponent: React.FC = () => {
   };
 
   useEffect(() => {
-    if (isLoaded) {
-      setMapLoaded(true);
-    }
-  }, [isLoaded, setMapLoaded]);
-
-  useEffect(() => {
     const handleResize = () => {
       if (mapRef.current && journey.waypoints.length) {
-        const bounds = getMapBounds(sortedWaypoints);
+        const bounds = getMapBounds(journey.waypoints);
         mapRef.current.fitBounds(bounds);
       }
     };
     window.addEventListener('resize', handleResize);
 
     return () => window.removeEventListener('resize', handleResize);
-  }, [journey.waypoints.length, sortedWaypoints]);
+  }, [journey.waypoints]);
 
   return isLoaded ? (
     <GoogleMap
@@ -78,14 +72,16 @@ const MapComponent: React.FC = () => {
       onClick={!journey.readonly ? onMapClick : undefined}
     >
       <>
-        {sortedWaypoints.map((waypoint) => (
+        {journey.waypoints.map((waypoint) => (
           <Marker
             key={waypoint.waypointId}
             position={{ lat: waypoint.coordinate.latitude, lng: waypoint.coordinate.longitude }}
             label={alphabethAt(waypoint.order - 1)}
           />
         ))}
-        {directions && <DirectionsRenderer directions={directions} options={{ suppressMarkers: true }} />}
+        {directions && (
+          <DirectionsRenderer key={directionsRenderKey} directions={directions} options={{ suppressMarkers: true }} />
+        )}
       </>
     </GoogleMap>
   ) : null;

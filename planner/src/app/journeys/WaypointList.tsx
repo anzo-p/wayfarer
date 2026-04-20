@@ -1,8 +1,6 @@
 import React, { useEffect } from 'react';
 
-import { MaybeDirections, requestDirections } from '@/src/api/google/directions';
 import { BannerTypeEnum } from '@/src/components/ui/InfoBanner';
-import { detectDetour } from '@/src/helpers/directions';
 import { alphabethAt } from '@/src/helpers/string';
 import { canMakeRoute } from '@/src/helpers/waypoints';
 import { RouteWaypoint } from '@/src/types/journey';
@@ -17,59 +15,7 @@ const itemStyle: React.CSSProperties = {
 };
 
 const WaypointList: React.FC = () => {
-  const {
-    journey,
-    sortedWaypoints,
-    mapLoaded,
-    removeWaypoint,
-    updateJourneyRoute,
-    hasFreshDirections,
-    setDirections,
-    markDirectionsCurrent,
-    showBanner
-  } = useJourney();
-
-  const onRequestDirections = async () => {
-    if (!mapLoaded) {
-      return;
-    }
-    if (!canMakeRoute(sortedWaypoints)) {
-      setDirections(undefined);
-      return;
-    }
-
-    try {
-      console.log('Requesting directions for waypoints:', sortedWaypoints);
-      const newDirections: MaybeDirections = await requestDirections(sortedWaypoints);
-      if (!newDirections) {
-        console.log('Google maps api responded no directions');
-        return;
-      }
-
-      if (detectDetour(newDirections)) {
-        showBanner({
-          bannerType: BannerTypeEnum.WARNING,
-          message:
-            'Unexpected detour detected. Intended route might not be possible due to restrictions or road closures.'
-        });
-      }
-
-      setDirections(newDirections);
-      markDirectionsCurrent();
-      updateJourneyRoute(newDirections.routes[0]?.legs);
-    } catch (error) {
-      console.error('Error calculating route:', error);
-    }
-  };
-
-  useEffect(() => {
-    if (!mapLoaded) {
-      return;
-    }
-    onRequestDirections();
-    //eslint-disable-next-line react-hooks/exhaustive-deps
-  }, [mapLoaded]);
-  // onRequestDirections is stable, will not be redefined
+  const { journey, removeWaypoint, requestRoute, hasFreshDirections, showBanner } = useJourney();
 
   useEffect(() => {
     if (journey.readonly) {
@@ -82,7 +28,7 @@ const WaypointList: React.FC = () => {
 
   return (
     <div>
-      {sortedWaypoints.map((waypoint: RouteWaypoint) => (
+      {journey.waypoints.map((waypoint: RouteWaypoint) => (
         <div key={waypoint.waypointId} style={itemStyle}>
           <span>{alphabethAt(waypoint.order - 1)}</span>
           <button disabled={journey.readonly} onClick={() => removeWaypoint(waypoint.waypointId)}>
@@ -90,7 +36,7 @@ const WaypointList: React.FC = () => {
           </button>
         </div>
       ))}
-      <button disabled={hasFreshDirections || !canMakeRoute(sortedWaypoints)} onClick={() => onRequestDirections()}>
+      <button disabled={hasFreshDirections || !canMakeRoute(journey.waypoints)} onClick={() => requestRoute()}>
         Get directions
       </button>
     </div>

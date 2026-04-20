@@ -2,11 +2,15 @@ import { useCallback, useEffect, useState } from 'react';
 import { v4 as uuidv4 } from 'uuid';
 
 import { saveJourney } from '@/src/api/journal/journey';
-import { mapAddresses, reindex, sort } from '@/src/helpers/waypoints';
+import { canonicalize } from '@/src/helpers/waypoints';
 import { Coordinate, Journey, RouteWaypoint, makeJourney, makeReadonlyCopy } from '@/src/types/journey';
 
-export const useJourneyState = (initialJourney: Journey) => {
-  const [journey, setJourney] = useState(initialJourney || makeJourney());
+export const useJourneyModel = (initialJourney: Journey) => {
+  const freshJourney = makeJourney();
+  const [journey, setJourney] = useState(() => ({
+    ...(initialJourney || freshJourney),
+    waypoints: canonicalize((initialJourney || freshJourney).waypoints)
+  }));
   const [isModified, setModified] = useState(false);
   const [isShared, setShared] = useState(false);
   const [lastSavedWaypoints, setLastSavedWaypoints] = useState<RouteWaypoint[]>(journey.waypoints || []);
@@ -28,15 +32,21 @@ export const useJourneyState = (initialJourney: Journey) => {
     [setJourney]
   );
 
-  const updateJourneyRoute = useCallback(
-    (legs: google.maps.DirectionsLeg[] | undefined) => {
-      if (!legs?.length) {
-        return;
-      }
-
+  const updateWaypoints = useCallback(
+    (waypoints: RouteWaypoint[]) => {
       setJourney((journey) => ({
         ...journey,
-        waypoints: mapAddresses(legs, sort(journey.waypoints))
+        waypoints: canonicalize(waypoints)
+      }));
+    },
+    [setJourney]
+  );
+
+  const removeWaypoint = useCallback(
+    (waypointId: string) => {
+      setJourney((journey) => ({
+        ...journey,
+        waypoints: canonicalize(journey.waypoints.filter((waypoint) => waypoint.waypointId !== waypointId))
       }));
     },
     [setJourney]
@@ -48,16 +58,6 @@ export const useJourneyState = (initialJourney: Journey) => {
       waypoints: []
     }));
   }, [setJourney]);
-
-  const removeWaypoint = useCallback(
-    (waypointId: string) => {
-      setJourney((journey) => ({
-        ...journey,
-        waypoints: reindex(journey.waypoints.filter((waypoint) => waypoint.waypointId !== waypointId))
-      }));
-    },
-    [setJourney]
-  );
 
   const saveChanges = async () => {
     await saveJourney(journey);
@@ -84,7 +84,7 @@ export const useJourneyState = (initialJourney: Journey) => {
     addWaypoint,
     removeWaypoint,
     removeAllWaypoints,
-    updateJourneyRoute,
+    updateWaypoints,
     isModified,
     saveChanges,
     isShared,

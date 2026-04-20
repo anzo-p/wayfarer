@@ -1,31 +1,28 @@
 'use client';
-import React, { createContext, useContext, useMemo, useState } from 'react';
-
+import React, { createContext, useContext, useMemo } from 'react';
 import { MaybeDirections } from '@/src/api/google/directions';
+
 import InfoBanner, { BannerTypeEnum } from '@/src/components/ui/InfoBanner';
 import ResponsiveMajorMinor from '@/src/components/ui/ResponsiveMajorMinor';
 import { OverlayToolbar } from '@/src/components/ui/Toolbar';
+import { canBeCleared, canMakeRoute } from '@/src/helpers/waypoints';
 import { useInfoBanner } from '@/src/hooks/useInfoBanner';
-import { useJourneyState } from '@/src/hooks/useJourneyState';
+import { useJourneyModel } from '@/src/hooks/useJourneyModel';
+import { useJourneyRouting } from '@/src/hooks/useJourneyRouting';
 import { Journey, RouteWaypoint, makeJourney } from '@/src/types/journey';
 
 import MapComponent from './MapComponent';
 import WaypointList from './WaypointList';
-import { canBeCleared, canMakeRoute, sort } from '@/src/helpers/waypoints';
 
 interface JourneyContextType {
   journey: Journey;
   addWaypoint: (coordinate: RouteWaypoint['coordinate']) => void;
   removeWaypoint: (waypointId: string) => void;
   removeAllWaypoints: () => void;
-  sortedWaypoints: RouteWaypoint[];
   directions: MaybeDirections;
-  updateJourneyRoute: (legs: google.maps.DirectionsLeg[] | undefined) => void;
-  setDirections: React.Dispatch<React.SetStateAction<MaybeDirections | undefined>>;
+  requestRoute: () => Promise<void>;
   hasFreshDirections: boolean;
-  markDirectionsCurrent: () => void;
-  mapLoaded: boolean;
-  setMapLoaded: React.Dispatch<React.SetStateAction<boolean>>;
+  directionsRenderKey: string;
   showBanner: (content: { bannerType: BannerTypeEnum; message: string; clipboardContent?: string }) => void;
 }
 
@@ -34,14 +31,10 @@ const JourneyContext = createContext<JourneyContextType>({
   addWaypoint: () => {},
   removeWaypoint: () => {},
   removeAllWaypoints: () => {},
-  sortedWaypoints: [],
   directions: undefined,
-  updateJourneyRoute: () => {},
-  setDirections: () => {},
+  requestRoute: async () => {},
   hasFreshDirections: false,
-  markDirectionsCurrent: () => {},
-  mapLoaded: false,
-  setMapLoaded: () => {},
+  directionsRenderKey: '',
   showBanner: () => {}
 });
 
@@ -57,28 +50,18 @@ const JourneyProvider: React.FC<JourneyProviderProps> = ({ journey: loadedJourne
     addWaypoint,
     removeWaypoint,
     removeAllWaypoints,
-    updateJourneyRoute,
+    updateWaypoints,
     isModified,
     saveChanges,
     isShared,
     saveCopyToShare
-  } = useJourneyState(loadedJourney || makeJourney());
-  const [mapLoaded, setMapLoaded] = useState(false);
-  const [directions, setDirections] = useState<MaybeDirections>(undefined);
-  const [directionsWaypointSignature, setDirectionsWaypointSignature] = useState<string | undefined>(undefined);
+  } = useJourneyModel(loadedJourney || makeJourney());
   const { bannerContent, isBannerVisible, showBanner, hideBanner } = useInfoBanner();
-  const sortedWaypoints = useMemo(() => sort(journey.waypoints), [journey.waypoints]);
-  const waypointSignature = useMemo(
-    () =>
-      sortedWaypoints
-        .map(
-          (waypoint) =>
-            `${waypoint.waypointId}:${waypoint.order}:${waypoint.coordinate.latitude}:${waypoint.coordinate.longitude}`
-        )
-        .join('|'),
-    [sortedWaypoints]
-  );
-  const hasFreshDirections = Boolean(directions) && directionsWaypointSignature === waypointSignature;
+  const { directions, hasFreshDirections, directionsRenderKey, requestRoute } = useJourneyRouting({
+    waypoints: journey.waypoints,
+    updateJourneyWaypoints: updateWaypoints,
+    showBanner
+  });
 
   const onClearButtonClick = () => {
     removeAllWaypoints();
@@ -98,14 +81,10 @@ const JourneyProvider: React.FC<JourneyProviderProps> = ({ journey: loadedJourne
   const onShareButtonClick = async () => {
     const copyJourneyId = await saveCopyToShare();
     showBanner({
-      message: 'Link to readonoly copy of your journey',
+      message: 'Link to readonly copy of your journey',
       bannerType: BannerTypeEnum.INFO,
       clipboardContent: `${baseUrl}/${copyJourneyId}`
     });
-  };
-
-  const markDirectionsCurrent = () => {
-    setDirectionsWaypointSignature(waypointSignature);
   };
 
   const memoizedContext = useMemo(
@@ -114,14 +93,10 @@ const JourneyProvider: React.FC<JourneyProviderProps> = ({ journey: loadedJourne
       addWaypoint,
       removeWaypoint,
       removeAllWaypoints,
-      sortedWaypoints,
       directions,
-      updateJourneyRoute,
-      setDirections,
+      requestRoute,
       hasFreshDirections,
-      markDirectionsCurrent,
-      mapLoaded,
-      setMapLoaded,
+      directionsRenderKey,
       showBanner
     }),
     [
@@ -129,14 +104,10 @@ const JourneyProvider: React.FC<JourneyProviderProps> = ({ journey: loadedJourne
       addWaypoint,
       removeWaypoint,
       removeAllWaypoints,
-      sortedWaypoints,
       directions,
-      updateJourneyRoute,
-      setDirections,
+      requestRoute,
       hasFreshDirections,
-      markDirectionsCurrent,
-      mapLoaded,
-      setMapLoaded,
+      directionsRenderKey,
       showBanner
     ]
   );
