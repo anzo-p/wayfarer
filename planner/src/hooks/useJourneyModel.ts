@@ -1,9 +1,9 @@
-import { useCallback, useEffect, useState } from 'react';
+import { useCallback, useState } from 'react';
 import { v4 as uuidv4 } from 'uuid';
 
 import { saveJourney } from '@/src/api/journal/journey';
 import { canonicalize } from '@/src/helpers/waypoints';
-import { Coordinate, Journey, RouteWaypoint, makeJourney, makeReadonlyCopy } from '@/src/types/journey';
+import { Coordinate, Journey, Waypoint, makeJourney, makeReadonlyCopy } from '@/src/types/journey';
 
 export const useJourneyModel = (initialJourney: Journey) => {
   const freshJourney = makeJourney();
@@ -13,10 +13,11 @@ export const useJourneyModel = (initialJourney: Journey) => {
   }));
   const [isModified, setModified] = useState(false);
   const [isShared, setShared] = useState(false);
-  const [lastSavedWaypoints, setLastSavedWaypoints] = useState<RouteWaypoint[]>(journey.waypoints || []);
 
   const addWaypoint = useCallback(
     (coordinate: Coordinate) => {
+      setModified(true);
+      setShared(false);
       setJourney((journey) => ({
         ...journey,
         waypoints: [
@@ -33,7 +34,9 @@ export const useJourneyModel = (initialJourney: Journey) => {
   );
 
   const updateWaypoints = useCallback(
-    (waypoints: RouteWaypoint[]) => {
+    (waypoints: Waypoint[]) => {
+      setModified(true);
+      setShared(false);
       setJourney((journey) => ({
         ...journey,
         waypoints: canonicalize(waypoints)
@@ -44,6 +47,8 @@ export const useJourneyModel = (initialJourney: Journey) => {
 
   const removeWaypoint = useCallback(
     (waypointId: string) => {
+      setModified(true);
+      setShared(false);
       setJourney((journey) => ({
         ...journey,
         waypoints: canonicalize(journey.waypoints.filter((waypoint) => waypoint.waypointId !== waypointId))
@@ -52,7 +57,9 @@ export const useJourneyModel = (initialJourney: Journey) => {
     [setJourney]
   );
 
-  const removeAllWaypoints = useCallback(() => {
+  const clearWaypoints = useCallback(() => {
+    setModified(true);
+    setShared(false);
     setJourney((journey) => ({
       ...journey,
       waypoints: []
@@ -62,7 +69,6 @@ export const useJourneyModel = (initialJourney: Journey) => {
   const saveChanges = async () => {
     await saveJourney(journey);
     setModified(false);
-    setLastSavedWaypoints(journey.waypoints);
   };
 
   const saveCopyToShare = async () => {
@@ -72,18 +78,11 @@ export const useJourneyModel = (initialJourney: Journey) => {
     return copy.journeyId;
   };
 
-  useEffect(() => {
-    if (JSON.stringify(journey.waypoints) !== JSON.stringify(lastSavedWaypoints)) {
-      setModified(true);
-      setShared(false);
-    }
-  }, [journey.waypoints, lastSavedWaypoints]);
-
   return {
     journey,
     addWaypoint,
     removeWaypoint,
-    removeAllWaypoints,
+    clearWaypoints,
     updateWaypoints,
     isModified,
     saveChanges,

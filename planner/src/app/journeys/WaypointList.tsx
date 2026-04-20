@@ -3,7 +3,7 @@ import React, { useEffect } from 'react';
 import { BannerTypeEnum } from '@/src/components/ui/InfoBanner';
 import { alphabethAt } from '@/src/helpers/string';
 import { canMakeRoute } from '@/src/helpers/waypoints';
-import { RouteWaypoint } from '@/src/types/journey';
+import { Waypoint } from '@/src/types/journey';
 
 import { useJourney } from './JourneyContext';
 
@@ -28,7 +28,7 @@ const WaypointList: React.FC = () => {
 
   return (
     <div>
-      {journey.waypoints.map((waypoint: RouteWaypoint) => (
+      {journey.waypoints.map((waypoint: Waypoint) => (
         <div key={waypoint.waypointId} style={itemStyle}>
           <span>{alphabethAt(waypoint.order - 1)}</span>
           <button disabled={journey.readonly} onClick={() => removeWaypoint(waypoint.waypointId)}>

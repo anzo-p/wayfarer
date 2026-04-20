@@ -2,34 +2,25 @@ import { useCallback, useMemo, useState } from 'react';
 
 import { MaybeDirections, requestDirections } from '@/src/api/google/directions';
 import { BannerTypeEnum } from '@/src/components/ui/InfoBanner';
-import { detectDetour } from '@/src/helpers/directions';
-import { canMakeRoute, mapAddresses } from '@/src/helpers/waypoints';
-import { RouteWaypoint } from '@/src/types/journey';
+import { detectDetour, mergeDirectionsIntoWaypoints } from '@/src/helpers/directions';
+import { canMakeRoute, resolveRouteSignature } from '@/src/helpers/waypoints';
+import { Waypoint } from '@/src/types/journey';
 
 interface UseJourneyRoutingParams {
-  waypoints: RouteWaypoint[];
-  updateJourneyWaypoints: (waypoints: RouteWaypoint[]) => void;
+  waypoints: Waypoint[];
+  updateRoute: (waypoints: Waypoint[]) => void;
   showBanner: (content: { bannerType: BannerTypeEnum; message: string; clipboardContent?: string }) => void;
 }
 
-export const useJourneyRouting = ({ waypoints, updateJourneyWaypoints, showBanner }: UseJourneyRoutingParams) => {
+export const useJourneyRouting = ({ waypoints, updateRoute, showBanner }: UseJourneyRoutingParams) => {
   const [directions, setDirections] = useState<MaybeDirections>(undefined);
-  const [directionsWaypointSignature, setDirectionsWaypointSignature] = useState<string | undefined>(undefined);
+  const [routeSignature, setRouteSignature] = useState<string | undefined>(undefined);
 
-  const waypointSignature = useMemo(
-    () =>
-      waypoints
-        .map(
-          (waypoint) =>
-            `${waypoint.waypointId}:${waypoint.order}:${waypoint.coordinate.latitude}:${waypoint.coordinate.longitude}`
-        )
-        .join('|'),
-    [waypoints]
-  );
+  const currentRouteSignature = useMemo(() => resolveRouteSignature(waypoints), [waypoints]);
 
-  const directionsRenderKey = directionsWaypointSignature ?? '';
+  const directionsRenderKey = routeSignature ?? '';
 
-  const hasFreshDirections = Boolean(directions) && directionsWaypointSignature === waypointSignature;
+  const hasFreshDirections = Boolean(directions) && routeSignature === currentRouteSignature;
 
   const requestRoute = useCallback(async () => {
     if (typeof window === 'undefined' || !window.google?.maps) {
@@ -58,12 +49,12 @@ export const useJourneyRouting = ({ waypoints, updateJourneyWaypoints, showBanne
       }
 
       setDirections(newDirections);
-      setDirectionsWaypointSignature(waypointSignature);
-      updateJourneyWaypoints(mapAddresses(newDirections.routes[0]?.legs ?? [], waypoints));
+      setRouteSignature(currentRouteSignature);
+      updateRoute(mergeDirectionsIntoWaypoints(newDirections.routes[0]?.legs, waypoints));
     } catch (error) {
       console.error('Error calculating route:', error);
     }
-  }, [waypoints, updateJourneyWaypoints, waypointSignature, showBanner]);
+  }, [waypoints, updateRoute, currentRouteSignature, showBanner]);
 
   return {
     directions,

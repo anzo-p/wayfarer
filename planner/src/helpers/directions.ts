@@ -1,18 +1,12 @@
-import { Coordinate, RouteWaypoint } from '@/src/types/journey';
+import { Coordinate, Waypoint } from '@/src/types/journey';
 
-import { bearingDeviation, calculateBearing } from './location';
+import { bearingDeviation, calculateBearing, euclideanDistance } from './location';
+
+type WaypointId = string;
 
 const angleThreshold = Number(process.env.NEXT_PUBLIC_ROUTE_DEVIATION_ANGULAR_LIMIT);
 const shortLegLimit = Number(process.env.NEXT_PUBLIC_ROUTE_DEVIATION_IGNORE_LEGS_SHORTER_THAN);
 const shortStepLimit = Number(process.env.NEXT_PUBLIC_ROUTE_DEVIATION_IGNORE_STEPS_SHORTER_THAN);
-
-export const getMapBounds = (waypoints: RouteWaypoint[]) => {
-  const bounds = new window.google.maps.LatLngBounds();
-  waypoints.forEach((waypoint) => {
-    bounds.extend(new window.google.maps.LatLng(waypoint.coordinate.latitude, waypoint.coordinate.longitude));
-  });
-  return bounds;
-};
 
 export const calculateTotalDistance = (directions: google.maps.DirectionsResult): number =>
   directions.routes.reduce((agg, route: google.maps.DirectionsRoute) => {
@@ -59,4 +53,58 @@ export const detectDetour = (directions: google.maps.DirectionsResult): boolean 
       return true;
     }
   });
+};
+
+export const getMapBounds = (waypoints: Waypoint[]) => {
+  const bounds = new window.google.maps.LatLngBounds();
+  waypoints.forEach((waypoint) => {
+    bounds.extend(new window.google.maps.LatLng(waypoint.coordinate.latitude, waypoint.coordinate.longitude));
+  });
+  return bounds;
+};
+
+export const mergeDirectionsIntoWaypoints = (
+  legs: google.maps.DirectionsLeg[] | undefined,
+  waypoints: Waypoint[]
+): Waypoint[] => {
+  if (!legs?.length) {
+    return waypoints;
+  }
+
+  return mergeDirectionsInternal(legs, waypoints);
+};
+
+const mergeDirectionsInternal = (legs: google.maps.DirectionsLeg[], waypoints: Waypoint[]): Waypoint[] => {
+  const addressesByWaypointId = new Map<WaypointId, string>();
+
+  legs.forEach((leg) => {
+    const waypoint = findNearestWaypoint(waypoints, {
+      latitude: leg.end_location.lat(),
+      longitude: leg.end_location.lng()
+    });
+
+    if (waypoint) {
+      addressesByWaypointId.set(waypoint.waypointId, leg.end_address);
+    }
+  });
+
+  return waypoints.map((waypoint) => ({
+    ...waypoint,
+    address: addressesByWaypointId.get(waypoint.waypointId) ?? waypoint.address
+  }));
+};
+
+const findNearestWaypoint = (waypoints: Waypoint[], coordinate: Coordinate): Waypoint | undefined => {
+  let nearestWaypoint = undefined;
+  let shortestDistance = Infinity;
+
+  waypoints.forEach((waypoint) => {
+    const distance = euclideanDistance(coordinate, waypoint.coordinate);
+    if (distance < shortestDistance) {
+      shortestDistance = distance;
+      nearestWaypoint = waypoint;
+    }
+  });
+
+  return nearestWaypoint;
 };

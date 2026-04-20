@@ -9,18 +9,18 @@ import { canBeCleared, canMakeRoute } from '@/src/helpers/waypoints';
 import { useInfoBanner } from '@/src/hooks/useInfoBanner';
 import { useJourneyModel } from '@/src/hooks/useJourneyModel';
 import { useJourneyRouting } from '@/src/hooks/useJourneyRouting';
-import { Journey, RouteWaypoint, makeJourney } from '@/src/types/journey';
+import { Journey, Waypoint, makeJourney } from '@/src/types/journey';
 
 import MapComponent from './MapComponent';
 import WaypointList from './WaypointList';
 
 interface JourneyContextType {
   journey: Journey;
-  addWaypoint: (coordinate: RouteWaypoint['coordinate']) => void;
+  addWaypoint: (coordinate: Waypoint['coordinate']) => void;
   removeWaypoint: (waypointId: string) => void;
-  removeAllWaypoints: () => void;
-  directions: MaybeDirections;
+  clearWaypoints: () => void;
   requestRoute: () => Promise<void>;
+  directions: MaybeDirections;
   hasFreshDirections: boolean;
   directionsRenderKey: string;
   showBanner: (content: { bannerType: BannerTypeEnum; message: string; clipboardContent?: string }) => void;
@@ -30,9 +30,9 @@ const JourneyContext = createContext<JourneyContextType>({
   journey: makeJourney(),
   addWaypoint: () => {},
   removeWaypoint: () => {},
-  removeAllWaypoints: () => {},
-  directions: undefined,
+  clearWaypoints: () => {},
   requestRoute: async () => {},
+  directions: undefined,
   hasFreshDirections: false,
   directionsRenderKey: '',
   showBanner: () => {}
@@ -49,7 +49,7 @@ const JourneyProvider: React.FC<JourneyProviderProps> = ({ journey: loadedJourne
     journey,
     addWaypoint,
     removeWaypoint,
-    removeAllWaypoints,
+    clearWaypoints,
     updateWaypoints,
     isModified,
     saveChanges,
@@ -59,12 +59,12 @@ const JourneyProvider: React.FC<JourneyProviderProps> = ({ journey: loadedJourne
   const { bannerContent, isBannerVisible, showBanner, hideBanner } = useInfoBanner();
   const { directions, hasFreshDirections, directionsRenderKey, requestRoute } = useJourneyRouting({
     waypoints: journey.waypoints,
-    updateJourneyWaypoints: updateWaypoints,
+    updateRoute: updateWaypoints,
     showBanner
   });
 
   const onClearButtonClick = () => {
-    removeAllWaypoints();
+    clearWaypoints();
   };
 
   const baseUrl = `${process.env.NEXT_PUBLIC_PLANNER_APP_URL}/journeys`;
@@ -92,9 +92,9 @@ const JourneyProvider: React.FC<JourneyProviderProps> = ({ journey: loadedJourne
       journey,
       addWaypoint,
       removeWaypoint,
-      removeAllWaypoints,
-      directions,
+      clearWaypoints,
       requestRoute,
+      directions,
       hasFreshDirections,
       directionsRenderKey,
       showBanner
@@ -103,9 +103,9 @@ const JourneyProvider: React.FC<JourneyProviderProps> = ({ journey: loadedJourne
       journey,
       addWaypoint,
       removeWaypoint,
-      removeAllWaypoints,
-      directions,
+      clearWaypoints,
       requestRoute,
+      directions,
       hasFreshDirections,
       directionsRenderKey,
       showBanner

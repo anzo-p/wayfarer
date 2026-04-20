@@ -9,7 +9,7 @@ export type Coordinate = {
   longitude: number;
 };
 
-export type RouteWaypoint = {
+export type Waypoint = {
   waypointId: WaypointId;
   coordinate: Coordinate;
   order: number;
@@ -20,7 +20,7 @@ export type Journey = {
   journeyId: JourneyId;
   time: Date;
   title?: string;
-  waypoints: RouteWaypoint[];
+  waypoints: Waypoint[];
   notes?: string;
   readonly: boolean;
 };

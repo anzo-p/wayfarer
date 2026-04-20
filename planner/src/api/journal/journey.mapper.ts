@@ -1,8 +1,8 @@
-import { Journey, RouteWaypoint } from '@/src/types/journey';
+import { Journey, Waypoint } from '@/src/types/journey';
 
 import { JourneyDto, RouteWaypointDto, SaveJourneyInputDto } from './journey.dto';
 
-const toRouteWaypoint = (dto: RouteWaypointDto): RouteWaypoint => ({
+const toRouteWaypoint = (dto: RouteWaypointDto): Waypoint => ({
   waypointId: dto.waypointId,
   coordinate: {
     latitude: dto.coordinate.latitude,
@@ -12,7 +12,7 @@ const toRouteWaypoint = (dto: RouteWaypointDto): RouteWaypoint => ({
   address: dto.address ?? undefined
 });
 
-const toRouteWaypointDto = (waypoint: RouteWaypoint): RouteWaypointDto => ({
+const toRouteWaypointDto = (waypoint: Waypoint): RouteWaypointDto => ({
   waypointId: waypoint.waypointId,
   coordinate: {
     latitude: waypoint.coordinate.latitude,

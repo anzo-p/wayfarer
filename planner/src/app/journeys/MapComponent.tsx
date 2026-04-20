@@ -3,7 +3,7 @@ import React, { useEffect, useRef } from 'react';
 
 import { getMapBounds } from '@/src/helpers/directions';
 import { alphabethAt } from '@/src/helpers/string';
-import { tooClose } from '@/src/helpers/waypoints';
+import { isTooClose } from '@/src/helpers/waypoints';
 import { Coordinate } from '@/src/types/journey';
 
 import { useJourney } from './JourneyContext';
@@ -43,7 +43,7 @@ const MapComponent: React.FC = () => {
   const onMapClick = (event: google.maps.MapMouseEvent) => {
     const coordinate: Coordinate = { latitude: event.latLng!.lat(), longitude: event.latLng!.lng() };
 
-    if (tooClose(coordinate, journey.waypoints)) {
+    if (isTooClose(coordinate, journey.waypoints)) {
       console.log('Marker too close to an existing waypoint.');
       return;
     }
