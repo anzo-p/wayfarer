@@ -19,7 +19,7 @@ const toRouteWaypointDto = (waypoint: RouteWaypoint): RouteWaypointDto => ({
     longitude: waypoint.coordinate.longitude
   },
   order: waypoint.order,
-  address: waypoint.address ?? "address undefined"
+  address: waypoint.address ?? 'address undefined'
 });
 
 export const toJourney = (dto: JourneyDto): Journey => ({

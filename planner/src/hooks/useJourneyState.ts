@@ -1,8 +1,9 @@
 import { useCallback, useEffect, useState } from 'react';
+import { v4 as uuidv4 } from 'uuid';
 
 import { saveJourney } from '@/src/api/journal/journey';
-import { reindex } from '@/src/helpers/waypoints';
-import { Journey, RouteWaypoint, makeJourney, makeReadonlyCopy } from '@/src/types/journey';
+import { mapAddresses, reindex, sort } from '@/src/helpers/waypoints';
+import { Coordinate, Journey, RouteWaypoint, makeJourney, makeReadonlyCopy } from '@/src/types/journey';
 
 export const useJourneyState = (initialJourney: Journey) => {
   const [journey, setJourney] = useState(initialJourney || makeJourney());
@@ -11,14 +12,42 @@ export const useJourneyState = (initialJourney: Journey) => {
   const [lastSavedWaypoints, setLastSavedWaypoints] = useState<RouteWaypoint[]>(journey.waypoints || []);
 
   const addWaypoint = useCallback(
-    (waypoint: RouteWaypoint) => {
+    (coordinate: Coordinate) => {
       setJourney((journey) => ({
         ...journey,
-        waypoints: [...journey.waypoints, waypoint]
+        waypoints: [
+          ...journey.waypoints,
+          {
+            waypointId: uuidv4(),
+            coordinate,
+            order: journey.waypoints.length + 1
+          }
+        ]
       }));
     },
     [setJourney]
   );
+
+  const updateJourneyRoute = useCallback(
+    (legs: google.maps.DirectionsLeg[] | undefined) => {
+      if (!legs?.length) {
+        return;
+      }
+
+      setJourney((journey) => ({
+        ...journey,
+        waypoints: mapAddresses(legs, sort(journey.waypoints))
+      }));
+    },
+    [setJourney]
+  );
+
+  const removeAllWaypoints = useCallback(() => {
+    setJourney((journey) => ({
+      ...journey,
+      waypoints: []
+    }));
+  }, [setJourney]);
 
   const removeWaypoint = useCallback(
     (waypointId: string) => {
@@ -52,9 +81,10 @@ export const useJourneyState = (initialJourney: Journey) => {
 
   return {
     journey,
-    setJourney,
     addWaypoint,
     removeWaypoint,
+    removeAllWaypoints,
+    updateJourneyRoute,
     isModified,
     saveChanges,
     isShared,

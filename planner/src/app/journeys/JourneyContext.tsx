@@ -15,16 +15,17 @@ import { canBeCleared, canMakeRoute, sort } from '@/src/helpers/waypoints';
 
 interface JourneyContextType {
   journey: Journey;
-  addWaypoint: (waypoint: RouteWaypoint) => void;
+  addWaypoint: (coordinate: RouteWaypoint['coordinate']) => void;
   removeWaypoint: (waypointId: string) => void;
+  removeAllWaypoints: () => void;
   sortedWaypoints: RouteWaypoint[];
   directions: MaybeDirections;
+  updateJourneyRoute: (legs: google.maps.DirectionsLeg[] | undefined) => void;
   setDirections: React.Dispatch<React.SetStateAction<MaybeDirections | undefined>>;
   hasFreshDirections: boolean;
   markDirectionsCurrent: () => void;
   mapLoaded: boolean;
   setMapLoaded: React.Dispatch<React.SetStateAction<boolean>>;
-
   showBanner: (content: { bannerType: BannerTypeEnum; message: string; clipboardContent?: string }) => void;
 }
 
@@ -32,8 +33,10 @@ const JourneyContext = createContext<JourneyContextType>({
   journey: makeJourney(),
   addWaypoint: () => {},
   removeWaypoint: () => {},
+  removeAllWaypoints: () => {},
   sortedWaypoints: [],
   directions: undefined,
+  updateJourneyRoute: () => {},
   setDirections: () => {},
   hasFreshDirections: false,
   markDirectionsCurrent: () => {},
@@ -49,8 +52,17 @@ export interface JourneyProviderProps {
 }
 
 const JourneyProvider: React.FC<JourneyProviderProps> = ({ journey: loadedJourney }) => {
-  const { journey, setJourney, addWaypoint, removeWaypoint, isModified, saveChanges, isShared, saveCopyToShare } =
-    useJourneyState(loadedJourney || makeJourney());
+  const {
+    journey,
+    addWaypoint,
+    removeWaypoint,
+    removeAllWaypoints,
+    updateJourneyRoute,
+    isModified,
+    saveChanges,
+    isShared,
+    saveCopyToShare
+  } = useJourneyState(loadedJourney || makeJourney());
   const [mapLoaded, setMapLoaded] = useState(false);
   const [directions, setDirections] = useState<MaybeDirections>(undefined);
   const [directionsWaypointSignature, setDirectionsWaypointSignature] = useState<string | undefined>(undefined);
@@ -69,10 +81,7 @@ const JourneyProvider: React.FC<JourneyProviderProps> = ({ journey: loadedJourne
   const hasFreshDirections = Boolean(directions) && directionsWaypointSignature === waypointSignature;
 
   const onClearButtonClick = () => {
-    setJourney((journey) => ({
-      ...journey,
-      waypoints: []
-    }));
+    removeAllWaypoints();
   };
 
   const baseUrl = `${process.env.NEXT_PUBLIC_PLANNER_APP_URL}/journeys`;
@@ -104,8 +113,10 @@ const JourneyProvider: React.FC<JourneyProviderProps> = ({ journey: loadedJourne
       journey,
       addWaypoint,
       removeWaypoint,
+      removeAllWaypoints,
       sortedWaypoints,
       directions,
+      updateJourneyRoute,
       setDirections,
       hasFreshDirections,
       markDirectionsCurrent,
@@ -117,8 +128,10 @@ const JourneyProvider: React.FC<JourneyProviderProps> = ({ journey: loadedJourne
       journey,
       addWaypoint,
       removeWaypoint,
+      removeAllWaypoints,
       sortedWaypoints,
       directions,
+      updateJourneyRoute,
       setDirections,
       hasFreshDirections,
       markDirectionsCurrent,

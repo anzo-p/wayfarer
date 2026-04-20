@@ -4,7 +4,7 @@ import { MaybeDirections, requestDirections } from '@/src/api/google/directions'
 import { BannerTypeEnum } from '@/src/components/ui/InfoBanner';
 import { detectDetour } from '@/src/helpers/directions';
 import { alphabethAt } from '@/src/helpers/string';
-import { canMakeRoute, updateAddresses } from '@/src/helpers/waypoints';
+import { canMakeRoute } from '@/src/helpers/waypoints';
 import { RouteWaypoint } from '@/src/types/journey';
 
 import { useJourney } from './JourneyContext';
@@ -22,6 +22,7 @@ const WaypointList: React.FC = () => {
     sortedWaypoints,
     mapLoaded,
     removeWaypoint,
+    updateJourneyRoute,
     hasFreshDirections,
     setDirections,
     markDirectionsCurrent,
@@ -55,7 +56,7 @@ const WaypointList: React.FC = () => {
 
       setDirections(newDirections);
       markDirectionsCurrent();
-      updateAddresses(newDirections.routes[0]?.legs, sortedWaypoints);
+      updateJourneyRoute(newDirections.routes[0]?.legs);
     } catch (error) {
       console.error('Error calculating route:', error);
     }

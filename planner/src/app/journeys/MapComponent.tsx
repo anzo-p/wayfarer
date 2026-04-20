@@ -1,6 +1,5 @@
 import { DirectionsRenderer, GoogleMap, Marker, useJsApiLoader } from '@react-google-maps/api';
 import React, { useEffect, useRef } from 'react';
-import { v4 as uuidv4 } from 'uuid';
 
 import { getMapBounds } from '@/src/helpers/directions';
 import { alphabethAt } from '@/src/helpers/string';
@@ -49,11 +48,7 @@ const MapComponent: React.FC = () => {
       return;
     }
 
-    addWaypoint({
-      waypointId: uuidv4(),
-      coordinate,
-      order: journey.waypoints.length + 1
-    });
+    addWaypoint(coordinate);
   };
 
   useEffect(() => {

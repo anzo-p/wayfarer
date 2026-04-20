@@ -2,11 +2,32 @@ import { Coordinate, RouteWaypoint } from '@/src/types/journey';
 
 import { euclideanDistance } from './location';
 
+type CoordinateKey = string;
+
 const proximityThreshold = 0.0001;
 
 export const canBeCleared = (waypoints: RouteWaypoint[]): boolean => waypoints.length > 0;
 
 export const canMakeRoute = (waypoints: RouteWaypoint[]): boolean => waypoints.length > 1;
+
+export const mapAddresses = (legs: google.maps.DirectionsLeg[], waypoints: RouteWaypoint[]): RouteWaypoint[] => {
+  const addressesByWaypointId = new Map<CoordinateKey, string>();
+
+  legs.forEach((leg) => {
+    const waypoint = findNearest(waypoints, {
+      latitude: leg.end_location.lat(),
+      longitude: leg.end_location.lng()
+    });
+    if (waypoint) {
+      addressesByWaypointId.set(waypoint.waypointId, leg.end_address);
+    }
+  });
+
+  return waypoints.map((waypoint) => ({
+    ...waypoint,
+    address: addressesByWaypointId.get(waypoint.waypointId) ?? waypoint.address
+  }));
+};
 
 export const reindex = (waypoints: RouteWaypoint[]): RouteWaypoint[] =>
   [...waypoints].map((waypoint, index) => ({
@@ -22,18 +43,6 @@ export const tooClose = (
   threshold: number = proximityThreshold
 ) => {
   return waypoints.some((waypoint) => euclideanDistance(coordinate, waypoint.coordinate) < threshold);
-};
-
-export const updateAddresses = (legs: google.maps.DirectionsLeg[], waypoints: RouteWaypoint[]): void => {
-  legs.forEach((leg) => {
-    const waypoint = findNearest(waypoints, {
-      latitude: leg.end_location.lat(),
-      longitude: leg.end_location.lng()
-    });
-    if (waypoint) {
-      waypoint.address = leg.end_address;
-    }
-  });
 };
 
 const findNearest = (waypoints: RouteWaypoint[], coordinate: Coordinate): RouteWaypoint | undefined => {
