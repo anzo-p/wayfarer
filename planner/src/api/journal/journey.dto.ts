@@ -3,7 +3,7 @@ export type CoordinateDto = {
   longitude: number;
 };
 
-export type RouteWaypointDto = {
+export type WaypointDto = {
   waypointId: string;
   coordinate: CoordinateDto;
   order: number;
@@ -14,7 +14,7 @@ export type JourneyDto = {
   journeyId: string;
   time: string;
   title?: string | null;
-  waypoints: RouteWaypointDto[];
+  waypoints: WaypointDto[];
   readonly: boolean;
 };
 
@@ -22,6 +22,6 @@ export type SaveJourneyInputDto = {
   journeyId: string;
   time: string;
   title?: string | null;
-  waypoints: RouteWaypointDto[];
+  waypoints: WaypointDto[];
   readonly: boolean;
 };

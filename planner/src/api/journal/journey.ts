@@ -2,15 +2,7 @@ import { Journey, MaybeJourney } from '@/src/types/journey';
 
 import { JourneyDto } from './journey.dto';
 import { toJourney, toSaveJourneyInputDto } from './journey.mapper';
-
-type JourneyQueryResult = {
-  data?: {
-    journey?: JourneyDto | null;
-  };
-  errors?: Array<{
-    message: string;
-  }>;
-};
+import { requestJournalGraphql } from './client';
 
 export async function getJourney(journeyId: string): Promise<MaybeJourney> {
   const query = `
@@ -33,22 +25,13 @@ export async function getJourney(journeyId: string): Promise<MaybeJourney> {
     }
   `;
 
-  const response = await fetch(`${process.env.NEXT_PUBLIC_JOURNAL_SERVICE_URL}`, {
-    method: 'POST',
-    headers: {
-      'Content-Type': 'application/json',
-      Accept: 'application/json'
-    },
-    body: JSON.stringify({ query, variables: { journeyId } })
+  const data = await requestJournalGraphql<{ journey?: JourneyDto | null }, { journeyId: string }>({
+    query,
+    variables: { journeyId }
   });
 
-  if (!response.ok) {
-    throw new Error('Network response was not ok');
-  }
-
-  const result: JourneyQueryResult = await response.json();
-  if (result.data?.journey) {
-    return toJourney(result.data.journey);
+  if (data.journey) {
+    return toJourney(data.journey);
   }
 }
 
@@ -61,27 +44,10 @@ export async function saveJourney(journey: Journey): Promise<void> {
     }
   `;
 
-  const response = await fetch(`${process.env.NEXT_PUBLIC_JOURNAL_SERVICE_URL}`, {
-    method: 'POST',
-    headers: {
-      'Content-Type': 'application/json',
-      Accept: 'application/json'
-    },
-    body: JSON.stringify({
-      query,
-      variables: {
-        newJourney
-      }
-    })
+  await requestJournalGraphql<{ createJourney: string }, { newJourney: ReturnType<typeof toSaveJourneyInputDto> }>({
+    query,
+    variables: {
+      newJourney
+    }
   });
-
-  const result: JourneyQueryResult = await response.json();
-
-  if (!response.ok) {
-    throw new Error(result.errors?.map((error) => error.message).join('; ') || 'Network response was not ok');
-  }
-
-  if (result.errors?.length) {
-    throw new Error(result.errors.map((error) => error.message).join('; '));
-  }
 }

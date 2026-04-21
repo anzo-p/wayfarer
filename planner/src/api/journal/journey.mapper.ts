@@ -1,8 +1,8 @@
 import { Journey, Waypoint } from '@/src/types/journey';
 
-import { JourneyDto, RouteWaypointDto, SaveJourneyInputDto } from './journey.dto';
+import { JourneyDto, WaypointDto, SaveJourneyInputDto } from './journey.dto';
 
-const toRouteWaypoint = (dto: RouteWaypointDto): Waypoint => ({
+const toWaypoint = (dto: WaypointDto): Waypoint => ({
   waypointId: dto.waypointId,
   coordinate: {
     latitude: dto.coordinate.latitude,
@@ -12,28 +12,28 @@ const toRouteWaypoint = (dto: RouteWaypointDto): Waypoint => ({
   address: dto.address ?? undefined
 });
 
-const toRouteWaypointDto = (waypoint: Waypoint): RouteWaypointDto => ({
+const toWaypointDto = (waypoint: Waypoint): WaypointDto => ({
   waypointId: waypoint.waypointId,
   coordinate: {
     latitude: waypoint.coordinate.latitude,
     longitude: waypoint.coordinate.longitude
   },
   order: waypoint.order,
-  address: waypoint.address ?? 'address undefined'
+  address: waypoint.address
 });
 
 export const toJourney = (dto: JourneyDto): Journey => ({
   journeyId: dto.journeyId,
   time: new Date(dto.time),
   title: dto.title ?? undefined,
-  waypoints: dto.waypoints.map(toRouteWaypoint),
+  waypoints: dto.waypoints.map(toWaypoint),
   readonly: dto.readonly
 });
 
 export const toSaveJourneyInputDto = (journey: Journey): SaveJourneyInputDto => ({
   journeyId: journey.journeyId,
   time: journey.time.toISOString(),
-  title: journey.title ?? "I'm feeling lucky!",
-  waypoints: journey.waypoints.map(toRouteWaypointDto),
+  title: journey.title,
+  waypoints: journey.waypoints.map(toWaypointDto),
   readonly: journey.readonly
 });
