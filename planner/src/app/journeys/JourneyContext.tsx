@@ -1,5 +1,5 @@
 'use client';
-import React, { createContext, useContext, useMemo } from 'react';
+import { FC, createContext, useContext, useMemo } from 'react';
 import { MaybeDirections } from '@/src/api/google/directions';
 
 import InfoBanner, { BannerTypeEnum } from '@/src/components/ui/InfoBanner';
@@ -44,7 +44,7 @@ export interface JourneyProviderProps {
   journey?: Journey;
 }
 
-const JourneyProvider: React.FC<JourneyProviderProps> = ({ journey: loadedJourney }) => {
+const JourneyProvider: FC<JourneyProviderProps> = ({ journey: loadedJourney }) => {
   const {
     journey,
     addWaypoint,

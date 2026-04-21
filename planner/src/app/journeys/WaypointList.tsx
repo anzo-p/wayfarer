@@ -1,4 +1,4 @@
-import React, { useEffect } from 'react';
+import { CSSProperties, useEffect } from 'react';
 
 import { BannerTypeEnum } from '@/src/components/ui/InfoBanner';
 import { alphabethAt } from '@/src/helpers/string';
@@ -7,14 +7,14 @@ import { Waypoint } from '@/src/types/journey';
 
 import { useJourney } from './JourneyContext';
 
-const itemStyle: React.CSSProperties = {
+const itemStyle: CSSProperties = {
   display: 'flex',
   justifyContent: 'space-between',
   padding: '10px',
   borderBottom: '1px solid #ccc'
 };
 
-const WaypointList: React.FC = () => {
+const WaypointList = () => {
   const { journey, removeWaypoint, requestRoute, hasFreshDirections, showBanner } = useJourney();
 
   useEffect(() => {

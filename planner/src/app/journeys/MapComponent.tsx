@@ -1,5 +1,5 @@
+import { CSSProperties, useCallback, useEffect, useRef } from 'react';
 import { DirectionsRenderer, GoogleMap, Marker, useJsApiLoader } from '@react-google-maps/api';
-import React, { useEffect, useRef } from 'react';
 
 import { getMapBounds } from '@/src/helpers/directions';
 import { alphabethAt } from '@/src/helpers/string';
@@ -14,7 +14,7 @@ if (!googleMapsApiKey) {
   throw new Error('GOOGLE_MAPS_API_KEY is not set');
 }
 
-const containerStyle: React.CSSProperties = {
+const containerStyle: CSSProperties = {
   width: '100%',
   height: '100%'
 };
@@ -24,12 +24,12 @@ const center = {
   lng: 26
 };
 
-const MapComponent: React.FC = () => {
+const MapComponent = () => {
   const { isLoaded } = useJsApiLoader({ id: 'google-map-loader', googleMapsApiKey });
   const mapRef = useRef<google.maps.Map>();
   const { journey, addWaypoint, directions, directionsRenderKey } = useJourney();
 
-  const onLoad = React.useCallback(
+  const onLoad = useCallback(
     function callback(map: google.maps.Map) {
       mapRef.current = map;
       if (journey.waypoints.length) {

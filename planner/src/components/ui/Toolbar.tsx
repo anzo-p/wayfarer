@@ -1,4 +1,4 @@
-import React from 'react';
+import { FC } from 'react';
 
 export interface OverlayToolbarProps {
   canBeCleared: boolean;
@@ -9,7 +9,7 @@ export interface OverlayToolbarProps {
   onSaveButtonClick: () => void;
 }
 
-export const OverlayToolbar: React.FC<OverlayToolbarProps> = ({
+export const OverlayToolbar: FC<OverlayToolbarProps> = ({
   canBeCleared,
   onClearButtonClick,
   canBeSaved,

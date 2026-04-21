@@ -1,4 +1,4 @@
-import { ReactNode, useEffect, useState } from 'react';
+import { CSSProperties, FC, ReactNode, useEffect, useState } from 'react';
 
 interface ResponsiveMajorMinorProps {
   major: ReactNode;
@@ -6,28 +6,28 @@ interface ResponsiveMajorMinorProps {
   toolbar?: ReactNode;
 }
 
-const landscapeStyles: React.CSSProperties = {
+const landscapeStyles: CSSProperties = {
   display: 'flex',
   flexDirection: 'row',
   height: '100vh'
 };
 
-const portraitStyles: React.CSSProperties = {
+const portraitStyles: CSSProperties = {
   display: 'flex',
   flexDirection: 'column',
   height: '100vh'
 };
 
-const majorStyles = (isLandscape: boolean): React.CSSProperties =>
+const majorStyles = (isLandscape: boolean): CSSProperties =>
   isLandscape
     ? { backgroundColor: 'lightblue', width: '100%', height: '100%' }
     : { backgroundColor: 'lightblue', width: '100%', height: 'calc(100vh * 0.618)' };
 
-const minorStyles: React.CSSProperties = {
+const minorStyles: CSSProperties = {
   width: '200px'
 };
 
-const overlayToolbarStyle: React.CSSProperties = {
+const overlayToolbarStyle: CSSProperties = {
   position: 'absolute',
   top: '15px',
   left: '50%',
@@ -39,7 +39,7 @@ const overlayToolbarStyle: React.CSSProperties = {
   zIndex: 1
 };
 
-const navBarToolbarStyles: React.CSSProperties = {
+const navBarToolbarStyles: CSSProperties = {
   width: '100%',
   height: '35px',
   color: 'white',
@@ -47,7 +47,7 @@ const navBarToolbarStyles: React.CSSProperties = {
   boxSizing: 'border-box'
 };
 
-const ResponsiveMajorMinor: React.FC<ResponsiveMajorMinorProps> = ({ major, minor, toolbar }) => {
+const ResponsiveMajorMinor: FC<ResponsiveMajorMinorProps> = ({ major, minor, toolbar }) => {
   const [isLandscape, setIsLandscape] = useState(false);
   const [isNarrow, setIsNarrow] = useState(false);
 

@@ -1,7 +1,7 @@
-import React from 'react';
+import { CSSProperties, FC } from 'react';
 
-const getBannerStyles = (type: BannerTypeEnum): React.CSSProperties => {
-  const baseStyles: React.CSSProperties = {
+const getBannerStyles = (type: BannerTypeEnum): CSSProperties => {
+  const baseStyles: CSSProperties = {
     width: '99%',
     height: '50px',
     position: 'fixed',
@@ -26,7 +26,7 @@ const getBannerStyles = (type: BannerTypeEnum): React.CSSProperties => {
   return { ...baseStyles, backgroundColor: backgroundColors[type] };
 };
 
-const dismissButtonStyles: React.CSSProperties = {
+const dismissButtonStyles: CSSProperties = {
   border: 'none',
   backgroundColor: 'transparent',
   color: '#666',
@@ -54,7 +54,7 @@ export interface InfoBannerProps {
   hideAction: () => void;
 }
 
-const InfoBanner: React.FC<InfoBannerProps> = ({ content: { bannerType, message, clipboardContent }, hideAction }) => {
+const InfoBanner: FC<InfoBannerProps> = ({ content: { bannerType, message, clipboardContent }, hideAction }) => {
   if (!message) return null;
 
   const copyToClipboard = async () => {
