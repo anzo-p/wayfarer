@@ -22,6 +22,7 @@ interface JourneyContextType {
   removeWaypoint: (waypointId: string) => void;
   clearWaypoints: () => void;
   requestRoute: () => Promise<void>;
+  isRouting: boolean;
   directions: MaybeDirections;
   hasFreshDirections: boolean;
   directionsRenderKey: string;
@@ -34,6 +35,7 @@ const JourneyContext = createContext<JourneyContextType>({
   removeWaypoint: () => {},
   clearWaypoints: () => {},
   requestRoute: async () => {},
+  isRouting: false,
   directions: undefined,
   hasFreshDirections: false,
   directionsRenderKey: '',
@@ -54,12 +56,14 @@ const JourneyProvider: FC<JourneyProviderProps> = ({ journey: loadedJourney }) =
     clearWaypoints,
     updateWaypoints,
     isModified,
+    isSaving,
+    isSharing,
     saveChanges,
     isShared,
     saveCopyToShare
   } = useJourneyModel(loadedJourney || makeJourney());
   const { bannerContent, isBannerVisible, showBanner, hideBanner } = useInfoBanner();
-  const { directions, hasFreshDirections, directionsRenderKey, requestRoute } = useJourneyRouting({
+  const { directions, hasFreshDirections, isRouting, directionsRenderKey, requestRoute } = useJourneyRouting({
     waypoints: journey.waypoints,
     updateRoute: updateWaypoints,
     showBanner
@@ -70,21 +74,37 @@ const JourneyProvider: FC<JourneyProviderProps> = ({ journey: loadedJourney }) =
   };
 
   const onSaveButtonClick = async () => {
-    await saveChanges();
-    showBanner({
-      message: 'Continue later from this state using this link',
-      bannerType: BannerTypeEnum.SUCCESS,
-      clipboardContent: `${baseUrl}/${journey.journeyId}`
-    });
+    try {
+      await saveChanges();
+      showBanner({
+        message: 'Continue later from this state using this link',
+        bannerType: BannerTypeEnum.SUCCESS,
+        clipboardContent: `${baseUrl}/${journey.journeyId}`
+      });
+    } catch (error) {
+      console.error('Error saving journey:', error);
+      showBanner({
+        message: 'Failed to save journey. Please try again.',
+        bannerType: BannerTypeEnum.ERROR
+      });
+    }
   };
 
   const onShareButtonClick = async () => {
-    const copyJourneyId = await saveCopyToShare();
-    showBanner({
-      message: 'Link to readonly copy of your journey',
-      bannerType: BannerTypeEnum.INFO,
-      clipboardContent: `${baseUrl}/${copyJourneyId}`
-    });
+    try {
+      const copyJourneyId = await saveCopyToShare();
+      showBanner({
+        message: 'Link to readonly copy of your journey',
+        bannerType: BannerTypeEnum.INFO,
+        clipboardContent: `${baseUrl}/${copyJourneyId}`
+      });
+    } catch (error) {
+      console.error('Error sharing journey:', error);
+      showBanner({
+        message: 'Failed to create a shared copy. Please try again.',
+        bannerType: BannerTypeEnum.ERROR
+      });
+    }
   };
 
   const memoizedContext = useMemo(
@@ -94,6 +114,7 @@ const JourneyProvider: FC<JourneyProviderProps> = ({ journey: loadedJourney }) =
       removeWaypoint,
       clearWaypoints,
       requestRoute,
+      isRouting,
       directions,
       hasFreshDirections,
       directionsRenderKey,
@@ -105,6 +126,7 @@ const JourneyProvider: FC<JourneyProviderProps> = ({ journey: loadedJourney }) =
       removeWaypoint,
       clearWaypoints,
       requestRoute,
+      isRouting,
       directions,
       hasFreshDirections,
       directionsRenderKey,
@@ -119,13 +141,17 @@ const JourneyProvider: FC<JourneyProviderProps> = ({ journey: loadedJourney }) =
           <OverlayToolbar
             canBeCleared={canBeCleared(journey.waypoints)}
             onClearButtonClick={onClearButtonClick}
-            canBeSaved={isModified && canMakeRoute(journey.waypoints)}
+            canBeSaved={isModified && canMakeRoute(journey.waypoints) && !isSaving}
+            isSaving={isSaving}
             onSaveButtonClick={onSaveButtonClick}
-            canBeShared={!journey.readonly && !isShared && canMakeRoute(journey.waypoints)}
+            canBeShared={!journey.readonly && !isShared && canMakeRoute(journey.waypoints) && !isSharing}
+            isSharing={isSharing}
             onShareButtonClick={onShareButtonClick}
           />
         }
-        major={<MapComponent shouldRequestInitialRoute={Boolean(loadedJourney && canMakeRoute(loadedJourney.waypoints))} />}
+        major={
+          <MapComponent shouldRequestInitialRoute={Boolean(loadedJourney && canMakeRoute(loadedJourney.waypoints))} />
+        }
         minor={<WaypointList />}
       />
       {isBannerVisible && <InfoBanner content={bannerContent} hideAction={hideBanner} />}

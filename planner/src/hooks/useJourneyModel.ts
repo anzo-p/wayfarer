@@ -12,6 +12,8 @@ export const useJourneyModel = (initialJourney: Journey) => {
     waypoints: canonicalize((initialJourney || freshJourney).waypoints)
   }));
   const [isModified, setModified] = useState(false);
+  const [isSaving, setIsSaving] = useState(false);
+  const [isSharing, setIsSharing] = useState(false);
   const [isShared, setShared] = useState(false);
 
   const addWaypoint = useCallback(
@@ -67,15 +69,25 @@ export const useJourneyModel = (initialJourney: Journey) => {
   }, [setJourney]);
 
   const saveChanges = async () => {
-    await saveJourney(journey);
-    setModified(false);
+    setIsSaving(true);
+    try {
+      await saveJourney(journey);
+      setModified(false);
+    } finally {
+      setIsSaving(false);
+    }
   };
 
   const saveCopyToShare = async () => {
-    const copy = makeReadonlyCopy(journey);
-    await saveJourney(copy);
-    setShared(true);
-    return copy.journeyId;
+    setIsSharing(true);
+    try {
+      const copy = makeReadonlyCopy(journey);
+      await saveJourney(copy);
+      setShared(true);
+      return copy.journeyId;
+    } finally {
+      setIsSharing(false);
+    }
   };
 
   return {
@@ -86,7 +98,9 @@ export const useJourneyModel = (initialJourney: Journey) => {
     updateWaypoints,
     isModified,
     saveChanges,
-    isShared,
-    saveCopyToShare
+    isSaving,
+    saveCopyToShare,
+    isSharing,
+    isShared
   };
 };

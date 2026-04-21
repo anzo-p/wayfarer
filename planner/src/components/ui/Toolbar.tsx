@@ -4,8 +4,10 @@ export interface OverlayToolbarProps {
   canBeCleared: boolean;
   onClearButtonClick: () => void;
   canBeSaved: boolean;
+  isSaving?: boolean;
   onShareButtonClick: () => void;
   canBeShared: boolean;
+  isSharing?: boolean;
   onSaveButtonClick: () => void;
 }
 
@@ -13,8 +15,10 @@ export const OverlayToolbar: FC<OverlayToolbarProps> = ({
   canBeCleared,
   onClearButtonClick,
   canBeSaved,
+  isSaving = false,
   onSaveButtonClick,
   canBeShared,
+  isSharing = false,
   onShareButtonClick
 }) => {
   return (
@@ -33,7 +37,7 @@ export const OverlayToolbar: FC<OverlayToolbarProps> = ({
           onSaveButtonClick();
         }}
       >
-        save
+        {isSaving ? 'saving...' : 'save'}
       </button>
       <button
         disabled={!canBeShared}
@@ -41,7 +45,7 @@ export const OverlayToolbar: FC<OverlayToolbarProps> = ({
           onShareButtonClick();
         }}
       >
-        share
+        {isSharing ? 'sharing...' : 'share'}
       </button>
     </div>
   );

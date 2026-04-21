@@ -14,6 +14,7 @@ interface UseJourneyRoutingParams {
 
 export const useJourneyRouting = ({ waypoints, updateRoute, showBanner }: UseJourneyRoutingParams) => {
   const [directions, setDirections] = useState<MaybeDirections>(undefined);
+  const [isRouting, setIsRouting] = useState(false);
   const [routeSignature, setRouteSignature] = useState<string | undefined>(undefined);
 
   const currentRouteSignature = useMemo(() => resolveRouteSignature(waypoints), [waypoints]);
@@ -32,11 +33,16 @@ export const useJourneyRouting = ({ waypoints, updateRoute, showBanner }: UseJou
       return;
     }
 
+    setIsRouting(true);
     try {
       console.log('Requesting directions for waypoints:', waypoints);
       const newDirections: MaybeDirections = await requestDirections(waypoints);
       if (!newDirections) {
         console.log('Google maps api responded no directions');
+        showBanner({
+          bannerType: BannerTypeEnum.ERROR,
+          message: 'Could not calculate a route for the current waypoints.'
+        });
         return;
       }
 
@@ -53,6 +59,12 @@ export const useJourneyRouting = ({ waypoints, updateRoute, showBanner }: UseJou
       updateRoute(mergeDirectionsIntoWaypoints(newDirections.routes[0]?.legs, waypoints));
     } catch (error) {
       console.error('Error calculating route:', error);
+      showBanner({
+        bannerType: BannerTypeEnum.ERROR,
+        message: 'Failed to calculate route. Please try again.'
+      });
+    } finally {
+      setIsRouting(false);
     }
   }, [waypoints, updateRoute, currentRouteSignature, showBanner]);
 
@@ -60,6 +72,7 @@ export const useJourneyRouting = ({ waypoints, updateRoute, showBanner }: UseJou
     directions,
     directionsRenderKey,
     hasFreshDirections,
+    isRouting,
     requestRoute
   };
 };

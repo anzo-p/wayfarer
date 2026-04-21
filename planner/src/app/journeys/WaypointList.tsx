@@ -15,7 +15,7 @@ const itemStyle: CSSProperties = {
 };
 
 const WaypointList = () => {
-  const { journey, removeWaypoint, requestRoute, hasFreshDirections, showBanner } = useJourney();
+  const { journey, removeWaypoint, requestRoute, isRouting, hasFreshDirections, showBanner } = useJourney();
 
   useEffect(() => {
     if (journey.readonly) {
@@ -36,8 +36,11 @@ const WaypointList = () => {
           </button>
         </div>
       ))}
-      <button disabled={hasFreshDirections || !canMakeRoute(journey.waypoints)} onClick={() => requestRoute()}>
-        Get directions
+      <button
+        disabled={isRouting || hasFreshDirections || !canMakeRoute(journey.waypoints)}
+        onClick={() => requestRoute()}
+      >
+        {isRouting ? 'Getting directions...' : 'Get directions'}
       </button>
     </div>
   );
