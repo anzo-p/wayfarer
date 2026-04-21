@@ -14,6 +14,8 @@ import { Journey, Waypoint, makeJourney } from '@/src/types/journey';
 import MapComponent from './MapComponent';
 import WaypointList from './WaypointList';
 
+const baseUrl = `${process.env.NEXT_PUBLIC_PLANNER_APP_URL}`;
+
 interface JourneyContextType {
   journey: Journey;
   addWaypoint: (coordinate: Waypoint['coordinate']) => void;
@@ -66,8 +68,6 @@ const JourneyProvider: FC<JourneyProviderProps> = ({ journey: loadedJourney }) =
   const onClearButtonClick = () => {
     clearWaypoints();
   };
-
-  const baseUrl = `${process.env.NEXT_PUBLIC_PLANNER_APP_URL}/journeys`;
 
   const onSaveButtonClick = async () => {
     await saveChanges();
@@ -125,7 +125,7 @@ const JourneyProvider: FC<JourneyProviderProps> = ({ journey: loadedJourney }) =
             onShareButtonClick={onShareButtonClick}
           />
         }
-        major={<MapComponent />}
+        major={<MapComponent shouldRequestInitialRoute={Boolean(loadedJourney && canMakeRoute(loadedJourney.waypoints))} />}
         minor={<WaypointList />}
       />
       {isBannerVisible && <InfoBanner content={bannerContent} hideAction={hideBanner} />}

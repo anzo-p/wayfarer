@@ -24,10 +24,15 @@ const center = {
   lng: 26
 };
 
-const MapComponent = () => {
+interface MapComponentProps {
+  shouldRequestInitialRoute?: boolean;
+}
+
+const MapComponent = ({ shouldRequestInitialRoute = false }: MapComponentProps) => {
   const { isLoaded } = useJsApiLoader({ id: 'google-map-loader', googleMapsApiKey });
   const mapRef = useRef<google.maps.Map>();
-  const { journey, addWaypoint, directions, directionsRenderKey } = useJourney();
+  const { journey, addWaypoint, directions, directionsRenderKey, requestRoute } = useJourney();
+  const hasRequestedInitialRoute = useRef(false);
 
   const onLoad = useCallback(
     function callback(map: google.maps.Map) {
@@ -50,6 +55,15 @@ const MapComponent = () => {
 
     addWaypoint(coordinate);
   };
+
+  useEffect(() => {
+    if (!isLoaded || !shouldRequestInitialRoute || hasRequestedInitialRoute.current) {
+      return;
+    }
+
+    hasRequestedInitialRoute.current = true;
+    void requestRoute();
+  }, [isLoaded, requestRoute, shouldRequestInitialRoute]);
 
   useEffect(() => {
     const handleResize = () => {
