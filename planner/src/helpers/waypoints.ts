@@ -4,9 +4,9 @@ import { euclideanDistance } from './location';
 
 const proximityThreshold = 0.0001;
 
-export const canBeCleared = (waypoints: Waypoint[]): boolean => waypoints.length > 0;
+export const hasWaypoints = (waypoints: Waypoint[]): boolean => waypoints.length > 0;
 
-export const canMakeRoute = (waypoints: Waypoint[]): boolean => waypoints.length > 1;
+export const canRequestRoute = (waypoints: Waypoint[]): boolean => waypoints.length > 1;
 
 export const canonicalize = (waypoints: Waypoint[]): Waypoint[] =>
   reindex([...waypoints].sort((a, b) => a.order - b.order));
@@ -17,7 +17,7 @@ export const isTooClose = (
   threshold: number = proximityThreshold
 ): Boolean => waypoints.some((waypoint) => euclideanDistance(coordinate, waypoint.coordinate) < threshold);
 
-export const resolveRouteSignature = (waypoints: Waypoint[]): string =>
+export const buildRouteSignature = (waypoints: Waypoint[]): string =>
   waypoints
     .map(
       (waypoint) =>

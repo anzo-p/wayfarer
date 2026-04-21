@@ -1,6 +1,6 @@
 import { getJourney } from '@/src/api/journal/journey';
 
-import JourneyProvider from '../JourneyContext';
+import JourneyProvider from '../JourneyProvider';
 
 async function JourneyPage({ params }: { params: Promise<{ journeyId: string }> }) {
   const { journeyId } = await params;

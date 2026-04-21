@@ -1,1 +1,1 @@
-export const alphabethAt = (index: number): string => 'ABCDEFGHIJKLMNOPQRSTUVWXYZ'.charAt(index % 26);
+export const waypointLabelAt = (index: number): string => 'ABCDEFGHIJKLMNOPQRSTUVWXYZ'.charAt(index % 26);

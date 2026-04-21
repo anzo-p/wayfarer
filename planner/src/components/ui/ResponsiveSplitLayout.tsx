@@ -1,6 +1,6 @@
 import { CSSProperties, FC, ReactNode, useEffect, useState } from 'react';
 
-interface ResponsiveMajorMinorProps {
+interface ResponsiveSplitLayoutProps {
   major: ReactNode;
   minor: ReactNode;
   toolbar?: ReactNode;
@@ -47,7 +47,7 @@ const navBarToolbarStyles: CSSProperties = {
   boxSizing: 'border-box'
 };
 
-const ResponsiveMajorMinor: FC<ResponsiveMajorMinorProps> = ({ major, minor, toolbar }) => {
+const ResponsiveSplitLayout: FC<ResponsiveSplitLayoutProps> = ({ major, minor, toolbar }) => {
   const [isLandscape, setIsLandscape] = useState(false);
   const [isNarrow, setIsNarrow] = useState(false);
 
@@ -73,4 +73,4 @@ const ResponsiveMajorMinor: FC<ResponsiveMajorMinorProps> = ({ major, minor, too
   );
 };
 
-export default ResponsiveMajorMinor;
+export default ResponsiveSplitLayout;

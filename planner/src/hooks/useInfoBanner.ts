@@ -3,21 +3,21 @@ import { useState } from 'react';
 import { BannerTypeEnum, InfoBannerContent } from '@/src/components/ui/InfoBanner';
 
 export const useInfoBanner = () => {
-  const [isBannerVisible, setShowBanner] = useState(false);
+  const [isBannerOpen, setIsBannerOpen] = useState(false);
   const [bannerContent, setBannerContent] = useState<InfoBannerContent>({
     bannerType: BannerTypeEnum.INFO,
     message: '',
     clipboardContent: ''
   });
 
-  const showBanner = (content: InfoBannerContent) => {
+  const openBanner = (content: InfoBannerContent) => {
     setBannerContent(content);
-    setShowBanner(true);
+    setIsBannerOpen(true);
   };
 
-  const hideBanner = () => {
-    setShowBanner(false);
+  const closeBanner = () => {
+    setIsBannerOpen(false);
   };
 
-  return { bannerContent, isBannerVisible, showBanner, hideBanner };
+  return { bannerContent, isBannerOpen, openBanner, closeBanner };
 };

@@ -1,53 +1,51 @@
 import { useCallback, useMemo, useState } from 'react';
+import { MaybeDirections, requestGoogleMapDirections } from '@/src/api/google/directions';
 
-import { MaybeDirections, requestDirections } from '@/src/api/google/directions';
 import { BannerTypeEnum } from '@/src/components/ui/InfoBanner';
-import { detectDetour, mergeDirectionsIntoWaypoints } from '@/src/helpers/directions';
-import { canMakeRoute, resolveRouteSignature } from '@/src/helpers/waypoints';
+import { applyLegAddressesToWaypoints, detectDetour } from '@/src/helpers/directions';
+import { buildRouteSignature, canRequestRoute } from '@/src/helpers/waypoints';
 import { Waypoint } from '@/src/types/journey';
 
 interface UseJourneyRoutingParams {
   waypoints: Waypoint[];
-  updateRoute: (waypoints: Waypoint[]) => void;
-  showBanner: (content: { bannerType: BannerTypeEnum; message: string; clipboardContent?: string }) => void;
+  updateWaypoints: (waypoints: Waypoint[]) => void;
+  openBanner: (content: { bannerType: BannerTypeEnum; message: string; clipboardContent?: string }) => void;
 }
 
-export const useJourneyRouting = ({ waypoints, updateRoute, showBanner }: UseJourneyRoutingParams) => {
+export const useJourneyRouting = ({ waypoints, updateWaypoints, openBanner }: UseJourneyRoutingParams) => {
   const [directions, setDirections] = useState<MaybeDirections>(undefined);
   const [isRouting, setIsRouting] = useState(false);
-  const [routeSignature, setRouteSignature] = useState<string | undefined>(undefined);
+  const [lastResolvedRouteSignature, setLastResolvedRouteSignature] = useState<string | undefined>(undefined);
 
-  const currentRouteSignature = useMemo(() => resolveRouteSignature(waypoints), [waypoints]);
+  const currentRouteSignature = useMemo(() => buildRouteSignature(waypoints), [waypoints]);
 
-  const directionsRenderKey = routeSignature ?? '';
+  const directionsRenderKey = lastResolvedRouteSignature ?? '';
 
-  const hasFreshDirections = Boolean(directions) && routeSignature === currentRouteSignature;
+  const hasFreshDirections = Boolean(directions) && lastResolvedRouteSignature === currentRouteSignature;
 
   const requestRoute = useCallback(async () => {
     if (typeof window === 'undefined' || !window.google?.maps) {
       return;
     }
 
-    if (!canMakeRoute(waypoints)) {
+    if (!canRequestRoute(waypoints)) {
       setDirections(undefined);
       return;
     }
 
     setIsRouting(true);
     try {
-      console.log('Requesting directions for waypoints:', waypoints);
-      const newDirections: MaybeDirections = await requestDirections(waypoints);
+      const newDirections: MaybeDirections = await requestGoogleMapDirections(waypoints);
       if (!newDirections) {
-        console.log('Google maps api responded no directions');
-        showBanner({
+        openBanner({
           bannerType: BannerTypeEnum.ERROR,
-          message: 'Could not calculate a route for the current waypoints.'
+          message: 'Google maps responded no directions. Make sure all waypoints close to a road.'
         });
         return;
       }
 
       if (detectDetour(newDirections)) {
-        showBanner({
+        openBanner({
           bannerType: BannerTypeEnum.WARNING,
           message:
             'Unexpected detour detected. Intended route might not be possible due to restrictions or road closures.'
@@ -55,18 +53,18 @@ export const useJourneyRouting = ({ waypoints, updateRoute, showBanner }: UseJou
       }
 
       setDirections(newDirections);
-      setRouteSignature(currentRouteSignature);
-      updateRoute(mergeDirectionsIntoWaypoints(newDirections.routes[0]?.legs, waypoints));
+      setLastResolvedRouteSignature(currentRouteSignature);
+      updateWaypoints(applyLegAddressesToWaypoints(newDirections.routes[0]?.legs, waypoints));
     } catch (error) {
       console.error('Error calculating route:', error);
-      showBanner({
+      openBanner({
         bannerType: BannerTypeEnum.ERROR,
         message: 'Failed to calculate route. Please try again.'
       });
     } finally {
       setIsRouting(false);
     }
-  }, [waypoints, updateRoute, currentRouteSignature, showBanner]);
+  }, [waypoints, updateWaypoints, currentRouteSignature, openBanner]);
 
   return {
     directions,

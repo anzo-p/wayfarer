@@ -11,7 +11,7 @@ export interface OverlayToolbarProps {
   onSaveButtonClick: () => void;
 }
 
-export const OverlayToolbar: FC<OverlayToolbarProps> = ({
+const ActionToolbar: FC<OverlayToolbarProps> = ({
   canBeCleared,
   onClearButtonClick,
   canBeSaved,
@@ -50,3 +50,5 @@ export const OverlayToolbar: FC<OverlayToolbarProps> = ({
     </div>
   );
 };
+
+export default ActionToolbar;

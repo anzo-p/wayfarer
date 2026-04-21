@@ -22,7 +22,7 @@ const getJournalServiceUrl = (): string => {
   return journalServiceUrl;
 };
 
-export async function requestJournalGraphql<TData, TVariables = undefined>({
+export async function executeJournalGraphql<TData, TVariables = undefined>({
   query,
   variables
 }: GraphqlRequestParams<TVariables>): Promise<TData> {

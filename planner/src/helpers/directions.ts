@@ -63,7 +63,7 @@ export const getMapBounds = (waypoints: Waypoint[]) => {
   return bounds;
 };
 
-export const mergeDirectionsIntoWaypoints = (
+export const applyLegAddressesToWaypoints = (
   legs: google.maps.DirectionsLeg[] | undefined,
   waypoints: Waypoint[]
 ): Waypoint[] => {
@@ -71,10 +71,6 @@ export const mergeDirectionsIntoWaypoints = (
     return waypoints;
   }
 
-  return mergeDirectionsInternal(legs, waypoints);
-};
-
-const mergeDirectionsInternal = (legs: google.maps.DirectionsLeg[], waypoints: Waypoint[]): Waypoint[] => {
   const addressesByWaypointId = new Map<WaypointId, string>();
 
   legs.forEach((leg) => {

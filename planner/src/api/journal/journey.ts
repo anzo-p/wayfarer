@@ -1,11 +1,11 @@
 import { Journey, MaybeJourney } from '@/src/types/journey';
 
+import { executeJournalGraphql } from './client';
 import { JourneyDto } from './journey.dto';
 import { toJourney, toSaveJourneyInputDto } from './journey.mapper';
-import { requestJournalGraphql } from './client';
 
 export async function getJourney(journeyId: string): Promise<MaybeJourney> {
-  const query = `
+  const document = `
     query Journey($journeyId: String!) {
       journey(journeyId: $journeyId) {
         journeyId
@@ -25,8 +25,8 @@ export async function getJourney(journeyId: string): Promise<MaybeJourney> {
     }
   `;
 
-  const data = await requestJournalGraphql<{ journey?: JourneyDto | null }, { journeyId: string }>({
-    query,
+  const data = await executeJournalGraphql<{ journey?: JourneyDto | null }, { journeyId: string }>({
+    query: document,
     variables: { journeyId }
   });
 
@@ -38,14 +38,14 @@ export async function getJourney(journeyId: string): Promise<MaybeJourney> {
 export async function saveJourney(journey: Journey): Promise<void> {
   const newJourney = toSaveJourneyInputDto(journey);
 
-  const query = `
+  const document = `
     mutation CreateJourney($newJourney: NewJourneyInput!) {
       createJourney(newJourney: $newJourney)
     }
   `;
 
-  await requestJournalGraphql<{ createJourney: string }, { newJourney: ReturnType<typeof toSaveJourneyInputDto> }>({
-    query,
+  await executeJournalGraphql<{ createJourney: string }, { newJourney: ReturnType<typeof toSaveJourneyInputDto> }>({
+    query: document,
     variables: {
       newJourney
     }

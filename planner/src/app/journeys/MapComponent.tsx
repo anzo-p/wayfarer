@@ -1,12 +1,13 @@
 import { CSSProperties, useCallback, useEffect, useRef } from 'react';
 import { DirectionsRenderer, GoogleMap, Marker, useJsApiLoader } from '@react-google-maps/api';
 
+import { BannerTypeEnum } from '@/src/components/ui/InfoBanner';
 import { getMapBounds } from '@/src/helpers/directions';
-import { alphabethAt } from '@/src/helpers/string';
+import { waypointLabelAt } from '@/src/helpers/string';
 import { isTooClose } from '@/src/helpers/waypoints';
 import { Coordinate } from '@/src/types/journey';
 
-import { useJourney } from './JourneyContext';
+import { useJourney } from './JourneyProvider';
 
 const googleMapsApiKey = process.env.NEXT_PUBLIC_GOOGLE_MAPS_API_KEY;
 
@@ -31,7 +32,7 @@ interface MapComponentProps {
 const MapComponent = ({ shouldRequestInitialRoute = false }: MapComponentProps) => {
   const { isLoaded } = useJsApiLoader({ id: 'google-map-loader', googleMapsApiKey });
   const mapRef = useRef<google.maps.Map>();
-  const { journey, addWaypoint, directions, directionsRenderKey, requestRoute } = useJourney();
+  const { journey, addWaypoint, directions, directionsRenderKey, requestRoute, openBanner } = useJourney();
   const hasRequestedInitialRoute = useRef(false);
 
   const onLoad = useCallback(
@@ -49,7 +50,10 @@ const MapComponent = ({ shouldRequestInitialRoute = false }: MapComponentProps) 
     const coordinate: Coordinate = { latitude: event.latLng!.lat(), longitude: event.latLng!.lng() };
 
     if (isTooClose(coordinate, journey.waypoints)) {
-      console.log('Marker too close to an existing waypoint.');
+      openBanner({
+        message: 'Marker too close to an existing waypoint.',
+        bannerType: BannerTypeEnum.ERROR
+      });
       return;
     }
 
@@ -90,7 +94,7 @@ const MapComponent = ({ shouldRequestInitialRoute = false }: MapComponentProps) 
           <Marker
             key={waypoint.waypointId}
             position={{ lat: waypoint.coordinate.latitude, lng: waypoint.coordinate.longitude }}
-            label={alphabethAt(waypoint.order - 1)}
+            label={waypointLabelAt(waypoint.order - 1)}
           />
         ))}
         {directions && (

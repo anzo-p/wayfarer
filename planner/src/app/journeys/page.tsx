@@ -1,9 +1,9 @@
 import React from 'react';
 
-import JourneyProvider from './JourneyContext';
+import JourneyProvider from './JourneyProvider';
 
-const RoutePage = () => {
+const JourneysPage = () => {
   return <JourneyProvider journey={undefined}></JourneyProvider>;
 };
 
-export default RoutePage;
+export default JourneysPage;

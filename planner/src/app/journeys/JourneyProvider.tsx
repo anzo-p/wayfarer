@@ -2,10 +2,10 @@
 import { FC, createContext, useContext, useMemo } from 'react';
 import { MaybeDirections } from '@/src/api/google/directions';
 
+import ActionToolbar from '@/src/components/ui/ActionToolbar';
 import InfoBanner, { BannerTypeEnum } from '@/src/components/ui/InfoBanner';
-import ResponsiveMajorMinor from '@/src/components/ui/ResponsiveMajorMinor';
-import { OverlayToolbar } from '@/src/components/ui/Toolbar';
-import { canBeCleared, canMakeRoute } from '@/src/helpers/waypoints';
+import ResponsiveSplitLayout from '@/src/components/ui/ResponsiveSplitLayout';
+import { hasWaypoints, canRequestRoute } from '@/src/helpers/waypoints';
 import { useInfoBanner } from '@/src/hooks/useInfoBanner';
 import { useJourneyModel } from '@/src/hooks/useJourneyModel';
 import { useJourneyRouting } from '@/src/hooks/useJourneyRouting';
@@ -26,7 +26,7 @@ interface JourneyContextType {
   directions: MaybeDirections;
   hasFreshDirections: boolean;
   directionsRenderKey: string;
-  showBanner: (content: { bannerType: BannerTypeEnum; message: string; clipboardContent?: string }) => void;
+  openBanner: (content: { bannerType: BannerTypeEnum; message: string; clipboardContent?: string }) => void;
 }
 
 const JourneyContext = createContext<JourneyContextType>({
@@ -39,7 +39,7 @@ const JourneyContext = createContext<JourneyContextType>({
   directions: undefined,
   hasFreshDirections: false,
   directionsRenderKey: '',
-  showBanner: () => {}
+  openBanner: () => {}
 });
 
 export const useJourney = () => useContext(JourneyContext);
@@ -62,11 +62,11 @@ const JourneyProvider: FC<JourneyProviderProps> = ({ journey: loadedJourney }) =
     isShared,
     saveCopyToShare
   } = useJourneyModel(loadedJourney || makeJourney());
-  const { bannerContent, isBannerVisible, showBanner, hideBanner } = useInfoBanner();
+  const { bannerContent, openBanner, isBannerOpen, closeBanner } = useInfoBanner();
   const { directions, hasFreshDirections, isRouting, directionsRenderKey, requestRoute } = useJourneyRouting({
     waypoints: journey.waypoints,
-    updateRoute: updateWaypoints,
-    showBanner
+    updateWaypoints,
+    openBanner
   });
 
   const onClearButtonClick = () => {
@@ -76,14 +76,14 @@ const JourneyProvider: FC<JourneyProviderProps> = ({ journey: loadedJourney }) =
   const onSaveButtonClick = async () => {
     try {
       await saveChanges();
-      showBanner({
+      openBanner({
         message: 'Continue later from this state using this link',
         bannerType: BannerTypeEnum.SUCCESS,
         clipboardContent: `${baseUrl}/${journey.journeyId}`
       });
     } catch (error) {
       console.error('Error saving journey:', error);
-      showBanner({
+      openBanner({
         message: 'Failed to save journey. Please try again.',
         bannerType: BannerTypeEnum.ERROR
       });
@@ -93,14 +93,14 @@ const JourneyProvider: FC<JourneyProviderProps> = ({ journey: loadedJourney }) =
   const onShareButtonClick = async () => {
     try {
       const copyJourneyId = await saveCopyToShare();
-      showBanner({
+      openBanner({
         message: 'Link to readonly copy of your journey',
         bannerType: BannerTypeEnum.INFO,
         clipboardContent: `${baseUrl}/${copyJourneyId}`
       });
     } catch (error) {
       console.error('Error sharing journey:', error);
-      showBanner({
+      openBanner({
         message: 'Failed to create a shared copy. Please try again.',
         bannerType: BannerTypeEnum.ERROR
       });
@@ -118,7 +118,7 @@ const JourneyProvider: FC<JourneyProviderProps> = ({ journey: loadedJourney }) =
       directions,
       hasFreshDirections,
       directionsRenderKey,
-      showBanner
+      openBanner
     }),
     [
       journey,
@@ -130,31 +130,33 @@ const JourneyProvider: FC<JourneyProviderProps> = ({ journey: loadedJourney }) =
       directions,
       hasFreshDirections,
       directionsRenderKey,
-      showBanner
+      openBanner
     ]
   );
 
   return (
     <JourneyContext.Provider value={memoizedContext}>
-      <ResponsiveMajorMinor
+      <ResponsiveSplitLayout
         toolbar={
-          <OverlayToolbar
-            canBeCleared={canBeCleared(journey.waypoints)}
+          <ActionToolbar
+            canBeCleared={hasWaypoints(journey.waypoints)}
             onClearButtonClick={onClearButtonClick}
-            canBeSaved={isModified && canMakeRoute(journey.waypoints) && !isSaving}
+            canBeSaved={isModified && canRequestRoute(journey.waypoints) && !isSaving}
             isSaving={isSaving}
             onSaveButtonClick={onSaveButtonClick}
-            canBeShared={!journey.readonly && !isShared && canMakeRoute(journey.waypoints) && !isSharing}
+            canBeShared={!journey.readonly && !isShared && canRequestRoute(journey.waypoints) && !isSharing}
             isSharing={isSharing}
             onShareButtonClick={onShareButtonClick}
           />
         }
         major={
-          <MapComponent shouldRequestInitialRoute={Boolean(loadedJourney && canMakeRoute(loadedJourney.waypoints))} />
+          <MapComponent
+            shouldRequestInitialRoute={Boolean(loadedJourney && canRequestRoute(loadedJourney.waypoints))}
+          />
         }
         minor={<WaypointList />}
       />
-      {isBannerVisible && <InfoBanner content={bannerContent} hideAction={hideBanner} />}
+      {isBannerOpen && <InfoBanner content={bannerContent} hideAction={closeBanner} />}
     </JourneyContext.Provider>
   );
 };
