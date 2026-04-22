@@ -1,4 +1,4 @@
-import { useState } from 'react';
+import { useCallback, useState } from 'react';
 
 import { BannerTypeEnum, InfoBannerContent } from '@/src/components/ui/InfoBanner';
 
@@ -10,14 +10,14 @@ export const useInfoBanner = () => {
     clipboardContent: ''
   });
 
-  const openBanner = (content: InfoBannerContent) => {
+  const openBanner = useCallback((content: InfoBannerContent) => {
     setBannerContent(content);
     setIsBannerOpen(true);
-  };
+  }, []);
 
-  const closeBanner = () => {
+  const closeBanner = useCallback(() => {
     setIsBannerOpen(false);
-  };
+  }, []);
 
   return { bannerContent, isBannerOpen, openBanner, closeBanner };
 };

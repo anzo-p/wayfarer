@@ -1,5 +1,5 @@
 'use client';
-import { FC, createContext, useContext, useMemo } from 'react';
+import { FC, createContext, useContext } from 'react';
 import { MaybeDirections } from '@/src/api/google/directions';
 
 import ActionToolbar from '@/src/components/ui/ActionToolbar';
@@ -107,35 +107,21 @@ const JourneyProvider: FC<JourneyProviderProps> = ({ journey: loadedJourney }) =
     }
   };
 
-  const memoizedContext = useMemo(
-    () => ({
-      journey,
-      addWaypoint,
-      removeWaypoint,
-      clearWaypoints,
-      requestRoute,
-      isRouting,
-      directions,
-      hasFreshDirections,
-      directionsRenderKey,
-      openBanner
-    }),
-    [
-      journey,
-      addWaypoint,
-      removeWaypoint,
-      clearWaypoints,
-      requestRoute,
-      isRouting,
-      directions,
-      hasFreshDirections,
-      directionsRenderKey,
-      openBanner
-    ]
-  );
-
   return (
-    <JourneyContext.Provider value={memoizedContext}>
+    <JourneyContext.Provider
+      value={{
+        journey,
+        addWaypoint,
+        removeWaypoint,
+        clearWaypoints,
+        requestRoute,
+        isRouting,
+        directions,
+        hasFreshDirections,
+        directionsRenderKey,
+        openBanner
+      }}
+    >
       <ResponsiveSplitLayout
         toolbar={
           <ActionToolbar
