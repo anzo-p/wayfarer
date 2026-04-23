@@ -7,7 +7,11 @@ export class JourneysService {
   constructor(private journeysRepository: JourneysRepository) {}
 
   async createJourney(journey: Journey): Promise<string> {
-    return this.journeysRepository.saveJourney(journey);
+    return this.journeysRepository.createJourney(journey);
+  }
+
+  async updateJourney(journey: Journey): Promise<string> {
+    return this.journeysRepository.updateJourney(journey);
   }
 
   async findOneById(id: string): Promise<any> {

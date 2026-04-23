@@ -7,6 +7,7 @@ describe('JourneysResolver', () => {
 
   const journeysServiceMock = {
     createJourney: jest.fn(),
+    updateJourney: jest.fn(),
     findOneById: jest.fn()
   };
 

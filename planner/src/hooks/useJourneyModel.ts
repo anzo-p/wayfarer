@@ -1,7 +1,7 @@
 import { useCallback, useState } from 'react';
 import { v4 as uuidv4 } from 'uuid';
 
-import { saveJourney } from '@/src/api/journal/journey';
+import { createJourney, updateJourney } from '@/src/api/journal/journey';
 import { canonicalize } from '@/src/helpers/waypoints';
 import { Coordinate, Journey, Waypoint, makeJourney, makeReadonlyCopy } from '@/src/types/journey';
 
@@ -13,6 +13,7 @@ export const useJourneyModel = (initialJourney: Journey) => {
   }));
   const [isModified, setModified] = useState(false);
   const [isSaving, setIsSaving] = useState(false);
+  const [hasBeenSaved, setHasBeenSaved] = useState(Boolean(initialJourney));
   const [isSharing, setIsSharing] = useState(false);
   const [isShared, setShared] = useState(false);
 
@@ -71,7 +72,12 @@ export const useJourneyModel = (initialJourney: Journey) => {
   const saveChanges = async () => {
     setIsSaving(true);
     try {
-      await saveJourney(journey);
+      if (hasBeenSaved) {
+        await updateJourney(journey);
+      } else {
+        await createJourney(journey);
+        setHasBeenSaved(true);
+      }
       setModified(false);
     } finally {
       setIsSaving(false);
@@ -82,7 +88,7 @@ export const useJourneyModel = (initialJourney: Journey) => {
     setIsSharing(true);
     try {
       const copy = makeReadonlyCopy(journey);
-      await saveJourney(copy);
+      await createJourney(copy);
       setShared(true);
       return copy.journeyId;
     } finally {

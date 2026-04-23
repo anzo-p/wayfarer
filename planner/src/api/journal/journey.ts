@@ -35,7 +35,7 @@ export async function getJourney(journeyId: string): Promise<MaybeJourney> {
   }
 }
 
-export async function saveJourney(journey: Journey): Promise<void> {
+export async function createJourney(journey: Journey): Promise<void> {
   const newJourney = toSaveJourneyInputDto(journey);
 
   const document = `
@@ -48,6 +48,23 @@ export async function saveJourney(journey: Journey): Promise<void> {
     query: document,
     variables: {
       newJourney
+    }
+  });
+}
+
+export async function updateJourney(journey: Journey): Promise<void> {
+  const newJourney = toSaveJourneyInputDto(journey);
+
+  const document = `
+    mutation UpdateJourney($journey: NewJourneyInput!) {
+      updateJourney(journey: $journey)
+    }
+  `;
+
+  await executeJournalGraphql<{ updateJourney: string }, { journey: ReturnType<typeof toSaveJourneyInputDto> }>({
+    query: document,
+    variables: {
+      journey: newJourney
     }
   });
 }

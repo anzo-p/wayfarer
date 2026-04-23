@@ -35,6 +35,7 @@ type Journey {
 
 type Mutation {
   createJourney(newJourney: NewJourneyInput!): String!
+  updateJourney(journey: NewJourneyInput!): String!
 }
 
 input NewJourneyInput {
