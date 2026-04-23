@@ -1,14 +1,15 @@
 import { Module } from '@nestjs/common';
+
 import { DynamoDBModule } from '../dynamodb/dynamodb.module';
 import {
   GqlBadDbDataException,
   GqlBadRequestException,
   GqlConflictException,
   GqlNotFoundException
-} from './errors/errors.filters';
-import { JourneyRepository } from './journey.repository';
-import { JourneyResolver } from './journey.resolver';
-import { JourneyService } from './journey.service';
+} from './api/filters/errors.filters';
+import { JourneyResolver } from './api/journey.resolver';
+import { JourneyService } from './application/journey.service';
+import { JourneyRepository } from './infrastructure/journey.repository';
 
 @Module({
   imports: [DynamoDBModule],

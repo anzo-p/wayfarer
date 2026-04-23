@@ -1,6 +1,6 @@
 import { AttributeValue } from '@aws-sdk/client-dynamodb';
-import { epochToIso8601 } from '../../helpers/date';
-import { Journey, RouteWaypoint } from './journey.model';
+import { epochToIso8601 } from '../../../helpers/date';
+import { Journey, RouteWaypoint } from '../../domain/journey.model';
 
 export const journeyFromDb = (rec: Record<string, AttributeValue>, waypoints: RouteWaypoint[]): Journey => {
   const item: Journey = {

@@ -2,12 +2,12 @@ import { ConflictException, Injectable, NotFoundException } from '@nestjs/common
 import { ConfigService } from '@nestjs/config';
 import { GetItemCommand, QueryCommand, TransactWriteItemsCommand } from '@aws-sdk/client-dynamodb';
 
-import { DynamoDBService } from '../dynamodb/dynamodb.service';
-import { BadDbDataException } from './errors/errors.custom-errors';
-import { journeyFromDb, waypointsFromDb } from './models/journey.from-db-item';
-import { Journey, RouteWaypoint } from './models/journey.model';
-import { journeyToDb, waypointsToDb } from './models/journey.to-db-item';
-import { validateJourney } from './validator/journey.validator';
+import { DynamoDBService } from '../../dynamodb/dynamodb.service';
+import { BadDbDataException } from '../api/filters/errors.custom-errors';
+import { Journey, RouteWaypoint } from '../domain/journey.model';
+import { validateJourney } from '../domain/validator/journey.validator';
+import { journeyFromDb, waypointsFromDb } from './mappers/journey.from-db-item';
+import { journeyToDb, waypointsToDb } from './mappers/journey.to-db-item';
 
 const ItemType = {
   Journey: 'JOURNEY',

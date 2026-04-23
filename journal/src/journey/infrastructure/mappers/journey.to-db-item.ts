@@ -1,6 +1,6 @@
 import { PutItemCommandInput } from '@aws-sdk/client-dynamodb';
-import { iso8601ToEpoch } from '../../helpers/date';
-import { Journey, RouteWaypoint } from './journey.model';
+import { iso8601ToEpoch } from '../../../helpers/date';
+import { Journey, RouteWaypoint } from '../../domain/journey.model';
 
 export const journeyToDb = (journey: Journey): PutItemCommandInput['Item'] => {
   const item: PutItemCommandInput['Item'] = {

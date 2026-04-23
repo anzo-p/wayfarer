@@ -1,6 +1,7 @@
 import { Injectable } from '@nestjs/common';
-import { JourneyRepository } from './journey.repository';
-import { Journey } from './models/journey.model';
+
+import { Journey } from '../domain/journey.model';
+import { JourneyRepository } from '../infrastructure/journey.repository';
 
 @Injectable()
 export class JourneyService {

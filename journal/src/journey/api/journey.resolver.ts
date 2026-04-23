@@ -6,10 +6,10 @@ import {
   GqlBadRequestException,
   GqlConflictException,
   GqlNotFoundException
-} from './errors/errors.filters';
-import { JourneyService } from './journey.service';
-import { Journey } from './models/journey.model';
-import { validateJourney } from './validator/journey.validator';
+} from './filters/errors.filters';
+import { JourneyService } from '../application/journey.service';
+import { Journey } from '../domain/journey.model';
+import { validateJourney } from '../domain/validator/journey.validator';
 
 @Resolver(() => Journey)
 @UseFilters(GqlBadDbDataException, GqlBadRequestException, GqlConflictException, GqlNotFoundException)

@@ -1,6 +1,6 @@
 import { Test, TestingModule } from '@nestjs/testing';
 import { JourneyResolver } from './journey.resolver';
-import { JourneyService } from './journey.service';
+import { JourneyService } from '../application/journey.service';
 
 describe('JourneyResolver', () => {
   let resolver: JourneyResolver;

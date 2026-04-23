@@ -1,8 +1,8 @@
 import { NotFoundException } from '@nestjs/common';
 import { ConfigService } from '@nestjs/config';
 
-import { DynamoDBService } from '../dynamodb/dynamodb.service';
-import { Journey } from './models/journey.model';
+import { DynamoDBService } from '../../dynamodb/dynamodb.service';
+import { Journey } from '../domain/journey.model';
 import { JourneyRepository } from './journey.repository';
 
 describe('JourneyRepository', () => {

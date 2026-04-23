@@ -1,7 +1,8 @@
 import { ApolloDriver } from '@nestjs/apollo';
-import { ConfigModule } from '@nestjs/config';
 import { Module } from '@nestjs/common';
+import { ConfigModule } from '@nestjs/config';
 import { GraphQLModule } from '@nestjs/graphql';
+
 import { JourneyModule } from './journey/journey.module';
 
 @Module({
