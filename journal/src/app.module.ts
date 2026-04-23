@@ -2,10 +2,7 @@ import { ApolloDriver } from '@nestjs/apollo';
 import { ConfigModule } from '@nestjs/config';
 import { Module } from '@nestjs/common';
 import { GraphQLModule } from '@nestjs/graphql';
-import { JourneysResolver } from './journey/journey.resolver';
-import { JourneysService } from './journey/journey.service';
-import { JourneysRepository } from './journey/journey.repository';
-import { DynamoDBModule } from './dynamodb/dynamodb.module';
+import { JourneyModule } from './journey/journey.module';
 
 @Module({
   imports: [
@@ -19,8 +16,8 @@ import { DynamoDBModule } from './dynamodb/dynamodb.module';
       autoSchemaFile: 'schema.gql',
       sortSchema: true
     }),
-    DynamoDBModule
+    JourneyModule
   ],
-  providers: [JourneysResolver, JourneysService, JourneysRepository]
+  providers: []
 })
 export class AppModule {}

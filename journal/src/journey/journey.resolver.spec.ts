@@ -1,11 +1,11 @@
 import { Test, TestingModule } from '@nestjs/testing';
-import { JourneysResolver } from './journey.resolver';
-import { JourneysService } from './journey.service';
+import { JourneyResolver } from './journey.resolver';
+import { JourneyService } from './journey.service';
 
-describe('JourneysResolver', () => {
-  let resolver: JourneysResolver;
+describe('JourneyResolver', () => {
+  let resolver: JourneyResolver;
 
-  const journeysServiceMock = {
+  const journeyServiceMock = {
     createJourney: jest.fn(),
     updateJourney: jest.fn(),
     findOneById: jest.fn()
@@ -14,15 +14,15 @@ describe('JourneysResolver', () => {
   beforeEach(async () => {
     const module: TestingModule = await Test.createTestingModule({
       providers: [
-        JourneysResolver,
+        JourneyResolver,
         {
-          provide: JourneysService,
-          useValue: journeysServiceMock
+          provide: JourneyService,
+          useValue: journeyServiceMock
         }
       ]
     }).compile();
 
-    resolver = module.get<JourneysResolver>(JourneysResolver);
+    resolver = module.get<JourneyResolver>(JourneyResolver);
   });
 
   it('should be defined', () => {

@@ -1,20 +1,20 @@
 import { Injectable } from '@nestjs/common';
-import { JourneysRepository } from './journey.repository';
+import { JourneyRepository } from './journey.repository';
 import { Journey } from './models/journey.model';
 
 @Injectable()
-export class JourneysService {
-  constructor(private journeysRepository: JourneysRepository) {}
+export class JourneyService {
+  constructor(private journeyRepository: JourneyRepository) {}
 
   async createJourney(journey: Journey): Promise<string> {
-    return this.journeysRepository.createJourney(journey);
+    return this.journeyRepository.createJourney(journey);
   }
 
   async updateJourney(journey: Journey): Promise<string> {
-    return this.journeysRepository.updateJourney(journey);
+    return this.journeyRepository.updateJourney(journey);
   }
 
   async findOneById(id: string): Promise<any> {
-    return this.journeysRepository.fetchJourney(id);
+    return this.journeyRepository.fetchJourney(id);
   }
 }

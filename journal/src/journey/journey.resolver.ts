@@ -7,19 +7,14 @@ import {
   GqlConflictException,
   GqlNotFoundException
 } from './errors/errors.filters';
-import { JourneysService } from './journey.service';
+import { JourneyService } from './journey.service';
 import { Journey } from './models/journey.model';
 import { validateJourney } from './validator/journey.validator';
 
 @Resolver(() => Journey)
-@UseFilters(
-  new GqlBadDbDataException(),
-  new GqlBadRequestException(),
-  new GqlConflictException(),
-  new GqlNotFoundException()
-)
-export class JourneysResolver {
-  constructor(private journeysService: JourneysService) {}
+@UseFilters(GqlBadDbDataException, GqlBadRequestException, GqlConflictException, GqlNotFoundException)
+export class JourneyResolver {
+  constructor(private journeyService: JourneyService) {}
 
   @Mutation(() => String)
   async createJourney(@Args('newJourney') newJourney: NewJourneyInput): Promise<string> {
@@ -27,7 +22,7 @@ export class JourneysResolver {
     if (error) {
       throw new BadRequestException(error.message);
     }
-    return this.journeysService.createJourney(value);
+    return this.journeyService.createJourney(value);
   }
 
   @Mutation(() => String)
@@ -36,11 +31,11 @@ export class JourneysResolver {
     if (error) {
       throw new BadRequestException(error.message);
     }
-    return this.journeysService.updateJourney(value);
+    return this.journeyService.updateJourney(value);
   }
 
   @Query(() => Journey)
   async journey(@Args('journeyId') journeyId: string): Promise<Journey> {
-    return this.journeysService.findOneById(journeyId);
+    return this.journeyService.findOneById(journeyId);
   }
 }

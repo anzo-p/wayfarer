@@ -17,7 +17,7 @@ const ItemType = {
 const DYNAMODB_MAX_TRANSACTION_WRITE_ITEMS = 100;
 
 @Injectable()
-export class JourneysRepository {
+export class JourneyRepository {
   private readonly journeyTable: string;
 
   constructor(

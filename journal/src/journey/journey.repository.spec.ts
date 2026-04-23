@@ -3,9 +3,9 @@ import { ConfigService } from '@nestjs/config';
 
 import { DynamoDBService } from '../dynamodb/dynamodb.service';
 import { Journey } from './models/journey.model';
-import { JourneysRepository } from './journey.repository';
+import { JourneyRepository } from './journey.repository';
 
-describe('JourneysRepository', () => {
+describe('JourneyRepository', () => {
   const journeyTable = 'journeys';
   const journey: Journey = {
     journeyId: 'c4dbe0b2-7c29-4c71-ae61-9384cce3a26e',
@@ -41,11 +41,11 @@ describe('JourneysRepository', () => {
     transactWriteItems: jest.fn()
   } as unknown as jest.Mocked<DynamoDBService>;
 
-  let repository: JourneysRepository;
+  let repository: JourneyRepository;
 
   beforeEach(() => {
     jest.clearAllMocks();
-    repository = new JourneysRepository(configServiceMock, dynamoDbServiceMock);
+    repository = new JourneyRepository(configServiceMock, dynamoDbServiceMock);
   });
 
   it('creates a journey atomically with its waypoint items', async () => {
