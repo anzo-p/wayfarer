@@ -24,7 +24,9 @@ input InputRouteWaypoint {
   waypointId: ID!
 }
 
-"""Journey"""
+"""
+Journey
+"""
 type Journey {
   journeyId: ID!
   readonly: Boolean!
@@ -50,7 +52,9 @@ type Query {
   journey(journeyId: String!): Journey!
 }
 
-"""Journey waypoints"""
+"""
+Journey waypoints
+"""
 type RouteWaypoint {
   address: String
   coordinate: Coordinate!

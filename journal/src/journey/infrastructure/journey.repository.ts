@@ -3,18 +3,33 @@ import { ConfigService } from '@nestjs/config';
 import { GetItemCommand, QueryCommand, TransactWriteItemsCommand } from '@aws-sdk/client-dynamodb';
 
 import { DynamoDBService } from '../../dynamodb/dynamodb.service';
-import { BadDbDataException } from '../api/filters/errors.custom-errors';
+import {
+  BadDbDataException,
+  JourneyPersistenceException,
+  JourneyStorageUnavailableException,
+  JourneyTransactionLimitException
+} from '../api/filters/errors.custom-errors';
 import { Journey, RouteWaypoint } from '../domain/journey.model';
 import { validateJourney } from '../domain/validator/journey.validator';
+import {
+  getJourneyItemType,
+  isCoreJourneyItem,
+  JourneyItemType,
+  journeyPk,
+  journeySk,
+  waypointSk
+} from './journey.keys';
 import { journeyFromDb, waypointsFromDb } from './mappers/journey.from-db-item';
 import { journeyToDb, waypointsToDb } from './mappers/journey.to-db-item';
 
-const ItemType = {
-  Journey: 'JOURNEY',
-  Waypoint: 'WAYPOINT'
-} as const;
-
 const DYNAMODB_MAX_TRANSACTION_WRITE_ITEMS = 100;
+const TRANSIENT_DYNAMODB_ERROR_NAMES = new Set([
+  'ProvisionedThroughputExceededException',
+  'RequestLimitExceeded',
+  'ThrottlingException',
+  'InternalServerError',
+  'ServiceUnavailable'
+]);
 
 @Injectable()
 export class JourneyRepository {
@@ -27,37 +42,33 @@ export class JourneyRepository {
     this.journeyTable = this.configService.get<string>('JOURNEY_TABLE');
   }
 
-  private journeyPk(journeyId: string): string {
-    return `${ItemType.Journey}#${journeyId}`;
-  }
-
-  private journeySk(journeyId: string): string {
-    return `${ItemType.Journey}#${journeyId}`;
-  }
-
-  private waypointSk(waypointId: string): string {
-    return `${ItemType.Waypoint}#${waypointId}`;
-  }
-
-  private getItemType(sk?: string): string | undefined {
-    return sk?.split('#')[0];
-  }
-
-  private isCoreJourneyItem(sk?: string): boolean {
-    return this.getItemType(sk) === ItemType.Waypoint;
-  }
-
   private isNamedError(error: unknown, name: string): boolean {
     return typeof error === 'object' && error !== null && 'name' in error && error.name === name;
   }
 
+  private getErrorName(error: unknown): string | undefined {
+    return typeof error === 'object' && error !== null && 'name' in error && typeof error.name === 'string'
+      ? error.name
+      : undefined;
+  }
+
+  private isTransientDynamoError(error: unknown): boolean {
+    const errorName = this.getErrorName(error);
+    return errorName !== undefined && TRANSIENT_DYNAMODB_ERROR_NAMES.has(errorName);
+  }
+
   private ensureTransactionSize(actionCount: number): void {
     if (actionCount > DYNAMODB_MAX_TRANSACTION_WRITE_ITEMS) {
-      throw new Error(
-        `Journey core write requires ${actionCount} transaction actions, ` +
-          `exceeding DynamoDB's limit of ${DYNAMODB_MAX_TRANSACTION_WRITE_ITEMS}.`
-      );
+      throw new JourneyTransactionLimitException(actionCount, DYNAMODB_MAX_TRANSACTION_WRITE_ITEMS);
     }
+  }
+
+  private handleWriteFailure(operation: 'createJourney' | 'updateJourney', error: unknown): never {
+    if (this.isTransientDynamoError(error)) {
+      throw new JourneyStorageUnavailableException(operation, error);
+    }
+
+    throw new JourneyPersistenceException(operation, error);
   }
 
   private buildJourneyRootPut(journey: Journey, conditionExpression: string) {
@@ -85,7 +96,7 @@ export class JourneyRepository {
       Delete: {
         TableName: this.journeyTable,
         Key: {
-          PK: { S: this.journeyPk(journeyId) },
+          PK: { S: journeyPk(journeyId) },
           SK: { S: waypointSk }
         }
       }
@@ -113,7 +124,7 @@ export class JourneyRepository {
         TableName: this.journeyTable,
         KeyConditionExpression: 'PK = :pk',
         ExpressionAttributeValues: {
-          ':pk': { S: this.journeyPk(journeyId) }
+          ':pk': { S: journeyPk(journeyId) }
         },
         ProjectionExpression: 'SK'
       })
@@ -123,7 +134,7 @@ export class JourneyRepository {
 
     relatedItems.Items?.forEach((item) => {
       const sk = item.SK.S;
-      if (this.isCoreJourneyItem(sk)) {
+      if (isCoreJourneyItem(sk)) {
         coreKeys.add(sk!);
       }
     });
@@ -142,9 +153,9 @@ export class JourneyRepository {
       );
     } catch (err) {
       if (this.isNamedError(err, 'TransactionCanceledException')) {
-        throw new ConflictException('journey already exists');
+        throw new ConflictException('journey already exists. Use updateJourney instead.');
       }
-      throw new Error(`Failed to save journey: ${err.toString()}`);
+      this.handleWriteFailure('createJourney', err);
     }
 
     return journey.journeyId;
@@ -152,7 +163,7 @@ export class JourneyRepository {
 
   async updateJourney(journey: Journey): Promise<string> {
     const existingWaypointKeys = await this.fetchExistingCoreWaypointKeys(journey.journeyId);
-    const nextWaypointKeys = new Set(journey.waypoints.map((waypoint) => this.waypointSk(waypoint.waypointId)));
+    const nextWaypointKeys = new Set(journey.waypoints.map((waypoint) => waypointSk(waypoint.waypointId)));
     const removedWaypointKeys = [...existingWaypointKeys].filter((sk) => !nextWaypointKeys.has(sk));
     const transactItems = this.buildUpdateJourneyTransaction(journey, removedWaypointKeys);
 
@@ -164,9 +175,9 @@ export class JourneyRepository {
       );
     } catch (err) {
       if (this.isNamedError(err, 'TransactionCanceledException')) {
-        throw new NotFoundException('journey not found');
+        throw new NotFoundException('journey not found for updateJourney. Use createJourney instead.');
       }
-      throw new Error(`Failed to update journey: ${err.toString()}`);
+      this.handleWriteFailure('updateJourney', err);
     }
 
     return journey.journeyId;
@@ -177,8 +188,8 @@ export class JourneyRepository {
       new GetItemCommand({
         TableName: this.journeyTable,
         Key: {
-          PK: { S: this.journeyPk(journeyId) },
-          SK: { S: this.journeySk(journeyId) }
+          PK: { S: journeyPk(journeyId) },
+          SK: { S: journeySk(journeyId) }
         }
       })
     );
@@ -196,7 +207,7 @@ export class JourneyRepository {
         TableName: this.journeyTable,
         KeyConditionExpression: 'PK = :pk',
         ExpressionAttributeValues: {
-          ':pk': { S: this.journeyPk(journeyId) }
+          ':pk': { S: journeyPk(journeyId) }
         }
       })
     );
@@ -204,9 +215,9 @@ export class JourneyRepository {
     const waypoints: RouteWaypoint[] = [];
 
     relatedItems.Items?.forEach((item) => {
-      const itemType = this.getItemType(item.SK.S);
+      const itemType = getJourneyItemType(item.SK.S);
       switch (itemType) {
-        case ItemType.Waypoint:
+        case JourneyItemType.Waypoint:
           waypoints.push(waypointsFromDb(item));
           break;
 
@@ -219,7 +230,7 @@ export class JourneyRepository {
 
     const { error, value } = validateJourney(journey);
     if (error) {
-      throw new BadDbDataException(`Validation failure when loadeing Journey from DB: ${error}`);
+      throw new BadDbDataException(`Validation failure when loading Journey from DB: ${error}`);
     }
 
     return value;

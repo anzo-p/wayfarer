@@ -2,6 +2,11 @@ import { NotFoundException } from '@nestjs/common';
 import { ConfigService } from '@nestjs/config';
 
 import { DynamoDBService } from '../../dynamodb/dynamodb.service';
+import {
+  JourneyPersistenceException,
+  JourneyStorageUnavailableException,
+  JourneyTransactionLimitException
+} from '../api/filters/errors.custom-errors';
 import { Journey } from '../domain/journey.model';
 import { JourneyRepository } from './journey.repository';
 
@@ -139,5 +144,35 @@ describe('JourneyRepository', () => {
     });
 
     await expect(repository.updateJourney(journey)).rejects.toBeInstanceOf(NotFoundException);
+  });
+
+  it('maps transient DynamoDB write failures to service unavailable', async () => {
+    dynamoDbServiceMock.transactWriteItems.mockRejectedValueOnce({
+      name: 'ProvisionedThroughputExceededException'
+    });
+
+    await expect(repository.createJourney(journey)).rejects.toBeInstanceOf(JourneyStorageUnavailableException);
+  });
+
+  it('maps non-transient DynamoDB write failures to persistence errors', async () => {
+    dynamoDbServiceMock.transactWriteItems.mockRejectedValueOnce({
+      name: 'ValidationException'
+    });
+
+    await expect(repository.createJourney(journey)).rejects.toBeInstanceOf(JourneyPersistenceException);
+  });
+
+  it('fails fast when a journey write would exceed DynamoDB transaction limits', async () => {
+    const oversizedJourney: Journey = {
+      ...journey,
+      waypoints: Array.from({ length: 100 }, (_, index) => ({
+        waypointId: `waypoint-${index}`,
+        coordinate: { latitude: 60.1699 + index, longitude: 24.9384 + index },
+        order: index
+      }))
+    };
+
+    await expect(repository.createJourney(oversizedJourney)).rejects.toBeInstanceOf(JourneyTransactionLimitException);
+    expect(dynamoDbServiceMock.transactWriteItems).not.toHaveBeenCalled();
   });
 });

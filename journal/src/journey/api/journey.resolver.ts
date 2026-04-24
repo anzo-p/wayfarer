@@ -5,14 +5,25 @@ import {
   GqlBadDbDataException,
   GqlBadRequestException,
   GqlConflictException,
-  GqlNotFoundException
+  GqlJourneyPersistenceException,
+  GqlJourneyTransactionLimitException,
+  GqlNotFoundException,
+  GqlServiceUnavailableException
 } from './filters/errors.filters';
 import { JourneyService } from '../application/journey.service';
 import { Journey } from '../domain/journey.model';
 import { validateJourney } from '../domain/validator/journey.validator';
 
 @Resolver(() => Journey)
-@UseFilters(GqlBadDbDataException, GqlBadRequestException, GqlConflictException, GqlNotFoundException)
+@UseFilters(
+  GqlBadDbDataException,
+  GqlBadRequestException,
+  GqlConflictException,
+  GqlNotFoundException,
+  GqlServiceUnavailableException,
+  GqlJourneyPersistenceException,
+  GqlJourneyTransactionLimitException
+)
 export class JourneyResolver {
   constructor(private journeyService: JourneyService) {}
 

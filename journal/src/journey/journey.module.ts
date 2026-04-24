@@ -5,7 +5,10 @@ import {
   GqlBadDbDataException,
   GqlBadRequestException,
   GqlConflictException,
-  GqlNotFoundException
+  GqlJourneyPersistenceException,
+  GqlJourneyTransactionLimitException,
+  GqlNotFoundException,
+  GqlServiceUnavailableException
 } from './api/filters/errors.filters';
 import { JourneyResolver } from './api/journey.resolver';
 import { JourneyService } from './application/journey.service';
@@ -20,7 +23,10 @@ import { JourneyRepository } from './infrastructure/journey.repository';
     GqlBadDbDataException,
     GqlBadRequestException,
     GqlConflictException,
-    GqlNotFoundException
+    GqlNotFoundException,
+    GqlServiceUnavailableException,
+    GqlJourneyPersistenceException,
+    GqlJourneyTransactionLimitException
   ]
 })
 export class JourneyModule {}
