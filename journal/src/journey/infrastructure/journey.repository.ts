@@ -215,8 +215,6 @@ export class JourneyRepository {
       }
     });
 
-    waypoints.sort((left, right) => left.order - right.order);
-
     const journey = await this.getJourneyItem(journeyId, waypoints);
 
     const { error, value } = validateJourney(journey);

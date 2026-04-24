@@ -24,7 +24,7 @@ export const journeySchema = Joi.object({
   journeyId: idSchema,
   time: Joi.date().iso(),
   title: maybeString,
-  waypoints: Joi.array().items(waypointSchema).required(),
+  waypoints: Joi.array().items(waypointSchema).unique('waypointId').required(),
   readonly: Joi.boolean().required()
 });
 

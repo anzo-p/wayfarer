@@ -87,7 +87,7 @@ describe('JourneyRepository', () => {
     expect(transactItems.some((item) => item.Delete?.Key?.SK?.S === 'PHOTO#photo-1')).toBe(false);
   });
 
-  it('returns waypoints ordered by their explicit order field', async () => {
+  it('returns waypoints in the order they were read while preserving explicit order values', async () => {
     dynamoDbServiceMock.queryItem.mockResolvedValueOnce({
       Items: [
         {
@@ -126,8 +126,8 @@ describe('JourneyRepository', () => {
     await expect(repository.fetchJourney(journey.journeyId)).resolves.toMatchObject({
       journeyId: journey.journeyId,
       waypoints: [
-        { waypointId: '22222222-2222-4222-8222-222222222222', order: 1 },
-        { waypointId: '11111111-1111-4111-8111-111111111111', order: 2 }
+        { waypointId: '11111111-1111-4111-8111-111111111111', order: 2 },
+        { waypointId: '22222222-2222-4222-8222-222222222222', order: 1 }
       ]
     });
   });
