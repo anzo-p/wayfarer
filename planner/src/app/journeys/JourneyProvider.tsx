@@ -48,7 +48,8 @@ export interface JourneyProviderProps {
   journey?: Journey;
 }
 
-const JourneyProvider: FC<JourneyProviderProps> = ({ journey: loadedJourney }) => {
+const JourneyProvider: FC<JourneyProviderProps> = (props: JourneyProviderProps) => {
+  const maybeJourney = props.journey;
   const {
     journey,
     addWaypoint,
@@ -61,7 +62,7 @@ const JourneyProvider: FC<JourneyProviderProps> = ({ journey: loadedJourney }) =
     saveChanges,
     isShared,
     saveCopyToShare
-  } = useJourneyModel(loadedJourney || makeJourney());
+  } = useJourneyModel(maybeJourney);
   const { bannerContent, openBanner, isBannerOpen, closeBanner } = useInfoBanner();
   const { directions, hasFreshDirections, isRouting, directionsRenderKey, requestRoute } = useJourneyRouting({
     waypoints: journey.waypoints,
@@ -136,9 +137,7 @@ const JourneyProvider: FC<JourneyProviderProps> = ({ journey: loadedJourney }) =
           />
         }
         major={
-          <MapComponent
-            shouldRequestInitialRoute={Boolean(loadedJourney && canRequestRoute(loadedJourney.waypoints))}
-          />
+          <MapComponent shouldRequestInitialRoute={Boolean(maybeJourney && canRequestRoute(maybeJourney.waypoints))} />
         }
         minor={<WaypointList />}
       />

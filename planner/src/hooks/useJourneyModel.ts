@@ -5,12 +5,14 @@ import { createJourney, updateJourney } from '@/src/api/journal/journey';
 import { canonicalize } from '@/src/helpers/waypoints';
 import { Coordinate, Journey, Waypoint, makeJourney, makeReadonlyCopy } from '@/src/types/journey';
 
-export const useJourneyModel = (initialJourney: Journey) => {
-  const freshJourney = makeJourney();
-  const [journey, setJourney] = useState(() => ({
-    ...(initialJourney || freshJourney),
-    waypoints: canonicalize((initialJourney || freshJourney).waypoints)
-  }));
+export const useJourneyModel = (initialJourney?: Journey) => {
+  const [journey, setJourney] = useState(() => {
+    const journey = initialJourney || makeJourney();
+    return {
+      ...journey,
+      waypoints: canonicalize(journey.waypoints)
+    };
+  });
   const [isModified, setModified] = useState(false);
   const [isSaving, setIsSaving] = useState(false);
   const [hasBeenSaved, setHasBeenSaved] = useState(Boolean(initialJourney));
