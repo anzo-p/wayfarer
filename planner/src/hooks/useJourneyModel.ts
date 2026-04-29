@@ -3,9 +3,24 @@ import { v4 as uuidv4 } from 'uuid';
 
 import { createJourney, updateJourney } from '@/src/api/journal/journey';
 import { canonicalize } from '@/src/helpers/waypoints';
-import { Coordinate, Journey, Waypoint, makeJourney, makeReadonlyCopy } from '@/src/types/journey';
+import type { Coordinate, Journey, Waypoint } from '@/src/types/journey';
+import { makeJourney, makeReadonlyCopy } from '@/src/types/journey';
 
-export const useJourneyModel = (initialJourney?: Journey) => {
+interface UseJourneyModelReturn {
+  journey: Journey;
+  addWaypoint: (coordinate: Coordinate) => void;
+  updateWaypoints: (waypoints: Waypoint[]) => void;
+  removeWaypoint: (waypointId: string) => void;
+  clearWaypoints: () => void;
+  isModified: boolean;
+  saveChanges: () => Promise<void>;
+  isSaving: boolean;
+  saveCopyToShare: () => Promise<string>;
+  isSharing: boolean;
+  isShared: boolean;
+}
+
+export function useJourneyModel(initialJourney?: Journey): UseJourneyModelReturn {
   const [journey, setJourney] = useState(() => {
     const journey = initialJourney || makeJourney();
     return {
@@ -19,48 +34,39 @@ export const useJourneyModel = (initialJourney?: Journey) => {
   const [isSharing, setIsSharing] = useState(false);
   const [isShared, setShared] = useState(false);
 
-  const addWaypoint = useCallback(
-    (coordinate: Coordinate) => {
-      setModified(true);
-      setShared(false);
-      setJourney((journey) => ({
-        ...journey,
-        waypoints: [
-          ...journey.waypoints,
-          {
-            waypointId: uuidv4(),
-            coordinate,
-            order: journey.waypoints.length + 1
-          }
-        ]
-      }));
-    },
-    [setJourney]
-  );
+  const addWaypoint = useCallback((coordinate: Coordinate) => {
+    setModified(true);
+    setShared(false);
+    setJourney((journey) => ({
+      ...journey,
+      waypoints: [
+        ...journey.waypoints,
+        {
+          waypointId: uuidv4(),
+          coordinate,
+          order: journey.waypoints.length + 1
+        }
+      ]
+    }));
+  }, []);
 
-  const updateWaypoints = useCallback(
-    (waypoints: Waypoint[]) => {
-      setModified(true);
-      setShared(false);
-      setJourney((journey) => ({
-        ...journey,
-        waypoints: canonicalize(waypoints)
-      }));
-    },
-    [setJourney]
-  );
+  const updateWaypoints = useCallback((waypoints: Waypoint[]) => {
+    setModified(true);
+    setShared(false);
+    setJourney((journey) => ({
+      ...journey,
+      waypoints: canonicalize(waypoints)
+    }));
+  }, []);
 
-  const removeWaypoint = useCallback(
-    (waypointId: string) => {
-      setModified(true);
-      setShared(false);
-      setJourney((journey) => ({
-        ...journey,
-        waypoints: canonicalize(journey.waypoints.filter((waypoint) => waypoint.waypointId !== waypointId))
-      }));
-    },
-    [setJourney]
-  );
+  const removeWaypoint = useCallback((waypointId: string) => {
+    setModified(true);
+    setShared(false);
+    setJourney((journey) => ({
+      ...journey,
+      waypoints: canonicalize(journey.waypoints.filter((waypoint) => waypoint.waypointId !== waypointId))
+    }));
+  }, []);
 
   const clearWaypoints = useCallback(() => {
     setModified(true);
@@ -69,9 +75,9 @@ export const useJourneyModel = (initialJourney?: Journey) => {
       ...journey,
       waypoints: []
     }));
-  }, [setJourney]);
+  }, []);
 
-  const saveChanges = async () => {
+  const saveChanges = useCallback(async () => {
     setIsSaving(true);
     try {
       if (hasBeenSaved) {
@@ -84,9 +90,9 @@ export const useJourneyModel = (initialJourney?: Journey) => {
     } finally {
       setIsSaving(false);
     }
-  };
+  }, [hasBeenSaved, journey]);
 
-  const saveCopyToShare = async () => {
+  const saveCopyToShare = useCallback(async () => {
     setIsSharing(true);
     try {
       const copy = makeReadonlyCopy(journey);
@@ -96,14 +102,14 @@ export const useJourneyModel = (initialJourney?: Journey) => {
     } finally {
       setIsSharing(false);
     }
-  };
+  }, [journey]);
 
   return {
     journey,
     addWaypoint,
+    updateWaypoints,
     removeWaypoint,
     clearWaypoints,
-    updateWaypoints,
     isModified,
     saveChanges,
     isSaving,
@@ -111,4 +117,4 @@ export const useJourneyModel = (initialJourney?: Journey) => {
     isSharing,
     isShared
   };
-};
+}

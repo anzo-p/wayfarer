@@ -1,18 +1,32 @@
 import { useCallback, useMemo, useState } from 'react';
-import { MaybeDirections, requestGoogleMapDirections } from '@/src/api/google/directions';
+import type { MaybeDirections } from '@/src/api/google/directions';
+import { requestGoogleMapDirections } from '@/src/api/google/directions';
 
+import type { InfoBannerContent } from '@/src/components/ui/InfoBanner';
 import { BannerTypeEnum } from '@/src/components/ui/InfoBanner';
 import { applyLegAddressesToWaypoints, detectDetour } from '@/src/helpers/directions';
 import { buildRouteSignature, canRequestRoute } from '@/src/helpers/waypoints';
-import { Waypoint } from '@/src/types/journey';
+import type { Waypoint } from '@/src/types/journey';
 
 interface UseJourneyRoutingParams {
   waypoints: Waypoint[];
   updateWaypoints: (waypoints: Waypoint[]) => void;
-  openBanner: (content: { bannerType: BannerTypeEnum; message: string; clipboardContent?: string }) => void;
+  openBanner: (content: InfoBannerContent) => void;
 }
 
-export const useJourneyRouting = ({ waypoints, updateWaypoints, openBanner }: UseJourneyRoutingParams) => {
+interface UseJourneyRoutingReturn {
+  directions: MaybeDirections;
+  directionsRenderKey: string;
+  hasFreshDirections: boolean;
+  isRouting: boolean;
+  requestRoute: () => Promise<void>;
+}
+
+export function useJourneyRouting({
+  waypoints,
+  updateWaypoints,
+  openBanner
+}: UseJourneyRoutingParams): UseJourneyRoutingReturn {
   const [directions, setDirections] = useState<MaybeDirections>(undefined);
   const [isRouting, setIsRouting] = useState(false);
   const [lastResolvedRouteSignature, setLastResolvedRouteSignature] = useState<string | undefined>(undefined);
@@ -73,4 +87,4 @@ export const useJourneyRouting = ({ waypoints, updateWaypoints, openBanner }: Us
     isRouting,
     requestRoute
   };
-};
+}

@@ -1,8 +1,16 @@
 import { useCallback, useState } from 'react';
 
-import { BannerTypeEnum, InfoBannerContent } from '@/src/components/ui/InfoBanner';
+import type { InfoBannerContent } from '@/src/components/ui/InfoBanner';
+import { BannerTypeEnum } from '@/src/components/ui/InfoBanner';
 
-export const useInfoBanner = () => {
+interface UseInfoBannerReturn {
+  openBanner: (content: InfoBannerContent) => void;
+  isBannerOpen: boolean;
+  bannerContent: InfoBannerContent;
+  closeBanner: () => void;
+}
+
+export function useInfoBanner(): UseInfoBannerReturn {
   const [isBannerOpen, setIsBannerOpen] = useState(false);
   const [bannerContent, setBannerContent] = useState<InfoBannerContent>({
     bannerType: BannerTypeEnum.INFO,
@@ -19,5 +27,5 @@ export const useInfoBanner = () => {
     setIsBannerOpen(false);
   }, []);
 
-  return { bannerContent, isBannerOpen, openBanner, closeBanner };
-};
+  return { openBanner, isBannerOpen, bannerContent, closeBanner };
+}

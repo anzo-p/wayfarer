@@ -1,9 +1,5 @@
-import React from 'react';
-
 import JourneyProvider from './JourneyProvider';
 
-const JourneysPage = () => {
-  return <JourneyProvider journey={undefined}></JourneyProvider>;
-};
-
-export default JourneysPage;
+export default function JourneysPage() {
+  return <JourneyProvider />;
+}

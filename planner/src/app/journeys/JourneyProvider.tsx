@@ -1,5 +1,5 @@
 'use client';
-import { FC, createContext, useContext } from 'react';
+import { createContext, useContext } from 'react';
 import { MaybeDirections } from '@/src/api/google/directions';
 
 import ActionToolbar from '@/src/components/ui/ActionToolbar';
@@ -44,26 +44,25 @@ const JourneyContext = createContext<JourneyContextType>({
 
 export const useJourney = () => useContext(JourneyContext);
 
-export interface JourneyProviderProps {
+interface JourneyProviderProps {
   journey?: Journey;
 }
 
-const JourneyProvider: FC<JourneyProviderProps> = (props: JourneyProviderProps) => {
-  const maybeJourney = props.journey;
+export default function JourneyProvider({ journey: maybeJourney }: JourneyProviderProps) {
   const {
     journey,
     addWaypoint,
+    updateWaypoints,
     removeWaypoint,
     clearWaypoints,
-    updateWaypoints,
     isModified,
-    isSaving,
-    isSharing,
     saveChanges,
-    isShared,
-    saveCopyToShare
+    isSaving,
+    saveCopyToShare,
+    isSharing,
+    isShared
   } = useJourneyModel(maybeJourney);
-  const { bannerContent, openBanner, isBannerOpen, closeBanner } = useInfoBanner();
+  const { openBanner, isBannerOpen, bannerContent, closeBanner } = useInfoBanner();
   const { directions, hasFreshDirections, isRouting, directionsRenderKey, requestRoute } = useJourneyRouting({
     waypoints: journey.waypoints,
     updateWaypoints,
@@ -144,6 +143,4 @@ const JourneyProvider: FC<JourneyProviderProps> = (props: JourneyProviderProps) 
       {isBannerOpen && <InfoBanner content={bannerContent} hideAction={closeBanner} />}
     </JourneyContext.Provider>
   );
-};
-
-export default JourneyProvider;
+}
