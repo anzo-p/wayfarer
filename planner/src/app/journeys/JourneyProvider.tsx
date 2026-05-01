@@ -3,8 +3,9 @@ import { createContext, useContext } from 'react';
 import { MaybeDirections } from '@/src/api/google/directions';
 
 import ActionToolbar from '@/src/components/ui/ActionToolbar';
+import type { InfoBannerContent } from '@/src/components/ui/InfoBanner';
 import InfoBanner, { BannerTypeEnum } from '@/src/components/ui/InfoBanner';
-import ResponsiveSplitLayout from '@/src/components/ui/ResponsiveSplitLayout';
+import ResponsiveSplitLayout from '@/src/components/ui/responsiveSplitLayout/ResponsiveSplitLayout';
 import { hasWaypoints, canRequestRoute } from '@/src/helpers/waypoints';
 import { useInfoBanner } from '@/src/hooks/useInfoBanner';
 import { useJourneyModel } from '@/src/hooks/useJourneyModel';
@@ -26,7 +27,7 @@ interface JourneyContextType {
   directions: MaybeDirections;
   hasFreshDirections: boolean;
   directionsRenderKey: string;
-  openBanner: (content: { bannerType: BannerTypeEnum; message: string; clipboardContent?: string }) => void;
+  openBanner: (content: InfoBannerContent) => void;
 }
 
 const JourneyContext = createContext<JourneyContextType>({
@@ -49,6 +50,15 @@ interface JourneyProviderProps {
 }
 
 export default function JourneyProvider({ journey: maybeJourney }: JourneyProviderProps) {
+  const initialBannerContent = maybeJourney?.readonly
+    ? {
+        bannerType: BannerTypeEnum.INFO,
+        message: 'This journey is shared with you as a readonly copy.'
+      }
+    : undefined;
+
+  const { openBanner, isBannerOpen, bannerContent, closeBanner } = useInfoBanner(initialBannerContent);
+
   const {
     journey,
     addWaypoint,
@@ -62,7 +72,7 @@ export default function JourneyProvider({ journey: maybeJourney }: JourneyProvid
     isSharing,
     isShared
   } = useJourneyModel(maybeJourney);
-  const { openBanner, isBannerOpen, bannerContent, closeBanner } = useInfoBanner();
+
   const { directions, hasFreshDirections, isRouting, directionsRenderKey, requestRoute } = useJourneyRouting({
     waypoints: journey.waypoints,
     updateWaypoints,

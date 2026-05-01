@@ -10,13 +10,15 @@ interface UseInfoBannerReturn {
   closeBanner: () => void;
 }
 
-export function useInfoBanner(): UseInfoBannerReturn {
-  const [isBannerOpen, setIsBannerOpen] = useState(false);
-  const [bannerContent, setBannerContent] = useState<InfoBannerContent>({
-    bannerType: BannerTypeEnum.INFO,
-    message: '',
-    clipboardContent: ''
-  });
+const defaultBannerContent: InfoBannerContent = {
+  bannerType: BannerTypeEnum.INFO,
+  message: '',
+  clipboardContent: ''
+};
+
+export function useInfoBanner(initialContent?: InfoBannerContent): UseInfoBannerReturn {
+  const [isBannerOpen, setIsBannerOpen] = useState(Boolean(initialContent));
+  const [bannerContent, setBannerContent] = useState<InfoBannerContent>(initialContent ?? defaultBannerContent);
 
   const openBanner = useCallback((content: InfoBannerContent) => {
     setBannerContent(content);

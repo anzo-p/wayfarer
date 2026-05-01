@@ -1,9 +1,8 @@
-import { CSSProperties, useEffect } from 'react';
+import type { CSSProperties } from 'react';
 
-import { BannerTypeEnum } from '@/src/components/ui/InfoBanner';
 import { waypointLabelAt } from '@/src/helpers/string';
 import { canRequestRoute } from '@/src/helpers/waypoints';
-import { Waypoint } from '@/src/types/journey';
+import type { Waypoint } from '@/src/types/journey';
 
 import { useJourney } from './JourneyProvider';
 
@@ -15,16 +14,7 @@ const itemStyle: CSSProperties = {
 };
 
 const WaypointList = () => {
-  const { journey, removeWaypoint, requestRoute, isRouting, hasFreshDirections, openBanner } = useJourney();
-
-  useEffect(() => {
-    if (journey.readonly) {
-      openBanner({
-        bannerType: BannerTypeEnum.INFO,
-        message: 'This journey is shared with you as a readonly copy.'
-      });
-    }
-  }, [journey.readonly, openBanner]);
+  const { journey, removeWaypoint, requestRoute, isRouting, hasFreshDirections } = useJourney();
 
   return (
     <div>
